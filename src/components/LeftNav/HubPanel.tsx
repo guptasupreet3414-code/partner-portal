@@ -8,8 +8,7 @@ import {
   HubProductRow,
   HubProductLabel,
 } from './HubPanel.styles';
-import { getProductIcon } from '../Icons';
-import { iconRailGroup1, iconRailGroup2, type IconRailProduct } from '../../data/navConfig';
+import { iconRailGroup1, iconRailGroup2, getProductLandingRoute, type IconRailProduct } from '../../data/navConfig';
 
 interface HubPanelProps {
   open: boolean;
@@ -26,7 +25,7 @@ const HubItem: React.FC<{
 
   const handleClick = () => {
     onSelect(product.id);
-    navigate(product.route);
+    navigate(getProductLandingRoute(product.id));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -55,7 +54,13 @@ const HubItem: React.FC<{
         aria-current={isActive ? 'page' : undefined}
         aria-label={product.label}
       >
-        {getProductIcon(product.iconType, 18, isActive ? '#1976D2' : '#6B7280')}
+        <product.Icon
+          aria-hidden="true"
+          focusable="false"
+          width={18}
+          height={18}
+          color={isActive ? '#1976D2' : '#6B7280'}
+        />
         <HubProductLabel>{product.label}</HubProductLabel>
       </HubProductRow>
     </div>

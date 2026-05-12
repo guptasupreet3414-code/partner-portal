@@ -27,20 +27,11 @@ export const NavRight = styled.div`
   gap: 4px;
 `;
 
-export const LogoText = styled.span`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 18px;
-  color: ${({ theme }) => theme.colors.white};
-  letter-spacing: 0.02em;
+export const LogoImage = styled.img`
+  height: 20px;
+  width: auto;
+  display: block;
   user-select: none;
-
-  .logo-bold {
-    font-weight: 700;
-  }
-
-  .logo-normal {
-    font-weight: 400;
-  }
 `;
 
 export const IconButton = styled.button`
@@ -58,7 +49,12 @@ export const IconButton = styled.button`
   position: relative;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: #0165AC;
+  }
+
+  &:active,
+  &[aria-expanded='true'] {
+    background: #004A80;
   }
 
   &:focus-visible {
@@ -86,18 +82,67 @@ export const CartBadge = styled.span`
   pointer-events: none;
 `;
 
+/*
+ * Tooltip shown beneath top-nav icon buttons. Hidden by default; revealed by
+ * the wrapper's :hover / :focus-within. Suppressed while a dropdown is open
+ * (button[aria-expanded="true"]) so the tooltip never overlaps the menu.
+ */
+export const TopNavTooltip = styled.span`
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.82);
+  color: #ffffff;
+  font-size: 12px;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  padding: 4px 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.default};
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  z-index: 1050;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 1ms;
+  }
+`;
+
 /* Wrapper for buttons that own a dropdown — provides the relative positioning anchor */
 export const NavDropdownWrapper = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+
+  &:hover ${TopNavTooltip},
+  &:focus-within ${TopNavTooltip} {
+    opacity: 1;
+  }
+
+  /* Hide the tooltip while the button's dropdown is open */
+  &:has(button[aria-expanded='true']) ${TopNavTooltip} {
+    opacity: 0;
+  }
+`;
+
+/*
+ * Settings / Help / Profile move into the hamburger drawer in mobile mode,
+ * so we hide their top-nav entries below the drawer breakpoint.
+ */
+export const HideOnMobile = styled.div`
+  display: contents;
+
+  @media (max-width: 639px) {
+    display: none;
+  }
 `;
 
 /* Hamburger is only relevant on mobile — hide it on tablet and desktop */
 export const HamburgerWrapper = styled.div`
   display: none;
 
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     display: flex;
     align-items: center;
   }
@@ -107,8 +152,8 @@ export const UserAvatar = styled.button`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #0D2137;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: #003E6B;
+  border: 1px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,8 +165,10 @@ export const UserAvatar = styled.button`
   transition: ${({ theme }) => theme.transitions.default};
   margin-left: 4px;
 
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.white};
+  &:hover,
+  &:active,
+  &[aria-expanded='true'] {
+    border-color: #1297F3;
   }
 
   &:focus-visible {

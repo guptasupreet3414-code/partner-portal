@@ -13,7 +13,7 @@ export const DrawerBackdrop = styled.div<{ $open: boolean }>`
   pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
   transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     top: 0;
   }
 
@@ -28,7 +28,7 @@ export const DrawerPanel = styled.div<{ $open: boolean }>`
   left: 0;
   bottom: 0;
   width: ${({ $open }) => ($open ? '260px' : '0')};
-  background: #E8EAED;
+  background: #F9FAFB;
   z-index: 1200;
   display: flex;
   flex-direction: column;
@@ -40,7 +40,7 @@ export const DrawerPanel = styled.div<{ $open: boolean }>`
       : 'width 200ms cubic-bezier(0.4, 0, 0.2, 1) 80ms'
   };
 
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     top: 0;
     width: ${({ $open }) => ($open ? 'min(85vw, 380px)' : '0')};
   }
@@ -83,7 +83,7 @@ export const DrawerPane = styled.div<{ $offset: number }>`
   bottom: 0;
   display: flex;
   flex-direction: column;
-  background: #E8EAED;
+  background: #F9FAFB;
   transform: translateX(${({ $offset }) => $offset}%);
   transition: transform 270ms cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -98,7 +98,7 @@ export const DrawerPaneHeader = styled.div`
   align-items: center;
   height: ${({ theme }) => theme.layout.topNavHeight};
   padding: 0 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   background: #E8EAED;
   flex-shrink: 0;
   gap: 4px;
@@ -107,7 +107,7 @@ export const DrawerPaneHeader = styled.div`
 export const DrawerPaneTitle = styled.span`
   flex: 1;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.neutral900};
   overflow: hidden;
@@ -152,6 +152,80 @@ export const DrawerPaneScroll = styled.div`
   }
 `;
 
+/* Fixed footer area at the bottom of the mobile L1 pane (Settings / Help / Profile). */
+export const DrawerFooter = styled.div`
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 8px 0;
+  background: #F9FAFB;
+`;
+
+export const DrawerFooterButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 16px);
+  height: 40px;
+  margin: 0 8px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 14px;
+  color: #636A6E;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    background: #F0F3F5;
+  }
+
+  &:active {
+    background: #E7EBEF;
+    color: #353535;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: -2px;
+  }
+`;
+
+export const DrawerFooterIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  color: inherit;
+  font-size: 16px;
+`;
+
+export const DrawerFooterLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const DrawerFooterAvatar = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  border-radius: 50%;
+  background: #003E6B;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+`;
+
 /* Section label in Level 2 sub-nav */
 export const DrawerSubSectionLabel = styled.div`
   padding: 10px 16px 4px;
@@ -163,45 +237,38 @@ export const DrawerSubSectionLabel = styled.div`
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
-/* Individual sub-nav link in Level 2 */
+/* Individual sub-nav link in Level 2 — matches desktop menu item spec */
 export const DrawerSubNavLink = styled(NavLink)<{ $active: boolean }>`
   text-decoration: none;
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 44px;
-  padding: 0 16px 0 24px;
+  gap: 8px;
+  width: calc(100% - 16px);
+  height: 40px;
+  margin: 0 8px;
+  padding: 0 12px;
   border: none;
-  background: ${({ $active }) => ($active ? 'rgba(25, 118, 210, 0.10)' : 'transparent')};
+  border-radius: 4px;
+  background: ${({ $active }) => ($active ? '#F0F3F5' : 'transparent')};
   cursor: pointer;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: 14px;
   font-weight: ${({ $active }) => ($active ? '500' : '400')};
-  color: ${({ $active }) => ($active ? '#1976D2' : '#374151')};
+  color: ${({ $active }) => ($active ? '#44484A' : '#636A6E')};
   text-align: left;
   transition: background 0.12s, color 0.12s;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 24px;
-    background: ${({ $active }) => ($active ? '#1976D2' : 'transparent')};
-    border-radius: 0 2px 2px 0;
-  }
 
   &:hover {
-    background: ${({ $active }) =>
-      $active ? 'rgba(25, 118, 210, 0.14)' : 'rgba(0, 0, 0, 0.06)'};
-    color: ${({ $active }) => ($active ? '#1976D2' : '#111827')};
+    background: #F0F3F5;
+  }
+
+  &:active {
+    background: #E7EBEF;
+    color: #353535;
   }
 
   &:focus-visible {
-    outline: 2px solid #1976D2;
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
     outline-offset: -2px;
   }
 `;
@@ -212,7 +279,7 @@ export const DrawerHeader = styled.div`
   display: none;
   flex-shrink: 0;
 
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -287,46 +354,37 @@ export const DrawerDivider = styled.hr`
 `;
 
 export const DrawerProductRow = styled.button<{ $active: boolean }>`
-  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  height: 44px;
-  padding: 0 16px;
+  width: calc(100% - 16px);
+  height: 40px;
+  margin: 0 8px;
+  padding: 0 12px;
   border: none;
-  background: ${({ $active }) => ($active ? 'rgba(25, 118, 210, 0.10)' : 'transparent')};
+  border-radius: 4px;
+  background: ${({ $active }) => ($active ? '#F0F3F5' : 'transparent')};
   cursor: pointer;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: 14px;
   font-weight: ${({ $active }) => ($active ? '500' : '400')};
-  color: ${({ $active }) => ($active ? '#1976D2' : '#374151')};
+  color: ${({ $active }) => ($active ? '#44484A' : '#636A6E')};
   text-align: left;
   transition: background 0.12s, color 0.12s;
   white-space: nowrap;
   overflow: hidden;
 
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 28px;
-    background: ${({ $active }) => ($active ? '#1976D2' : 'transparent')};
-    border-radius: 0 2px 2px 0;
-    transition: background 0.15s;
+  &:hover {
+    background: #F0F3F5;
   }
 
-  &:hover {
-    background: ${({ $active }) =>
-      $active ? 'rgba(25, 118, 210, 0.14)' : 'rgba(0, 0, 0, 0.06)'};
-    color: ${({ $active }) => ($active ? '#1976D2' : '#111827')};
+  &:active {
+    background: #E7EBEF;
+    color: #353535;
   }
 
   &:focus-visible {
-    outline: 2px solid #1976D2;
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
     outline-offset: -2px;
   }
 `;

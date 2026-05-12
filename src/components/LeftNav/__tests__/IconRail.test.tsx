@@ -10,7 +10,7 @@ describe('IconRail', () => {
       renderWithProviders(
         <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
       );
-      expect(screen.getByRole('navigation', { name: 'Product navigation' })).toBeInTheDocument();
+      expect(screen.getByRole('navigation', { name: 'Platform navigation' })).toBeInTheDocument();
     });
   });
 

@@ -29,8 +29,8 @@ export const DropdownSection = styled.div`
 export const DropdownHeader = styled.div`
   padding: 12px 16px 10px;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 500;
   color: ${({ theme }) => theme.colors.neutral900};
 `;
 
@@ -40,16 +40,51 @@ export const DropdownUserInfo = styled.div`
 
 export const DropdownUserName = styled.div`
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.neutral900};
+  line-height: 1.25;
+`;
+
+export const DropdownUserMeta = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.neutral700};
+  margin-top: 4px;
+  word-break: break-word;
 `;
 
 export const DropdownUserEmail = styled.div`
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 12px;
-  color: ${({ theme }) => theme.colors.neutral600};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.neutral700};
   margin-top: 2px;
+  word-break: break-word;
+`;
+
+export const DropdownOrgEnv = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.neutral900};
+
+  & > span:first-child {
+    font-weight: 500;
+  }
+
+  & > span:nth-child(2) {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #E2EEFF;
+    color: #0048AC;
+    font-size: 12px;
+    font-weight: 500;
+  }
 `;
 
 export const DropdownDivider = styled.hr`

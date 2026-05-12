@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  DropdownMenu,
+  DropdownMenuWide,
+  DropdownHeader,
   DropdownSection,
   DropdownItem,
   DropdownDivider,
@@ -12,17 +13,10 @@ interface SettingsDropdownProps {
   onSelectProduct: (id: string) => void;
 }
 
-const accountLinks = [
+const settingsLinks = [
   { label: 'User management', route: '/settings/users', productId: 'settings-users' },
   { label: 'Billing and subscriptions', route: '/settings/billing', productId: 'settings-billing' },
   { label: 'Account settings', route: '/settings/account', productId: 'settings-account' },
-  { label: 'Product settings', route: '/settings/product', productId: 'settings-product' },
-];
-
-const systemLinks = [
-  { label: 'Integrations', route: '/settings/integrations', productId: 'settings-integrations' },
-  { label: 'API access', route: '/settings/api', productId: 'settings-api' },
-  { label: 'Audit logs', route: '/settings/audit-logs', productId: 'settings-audit-logs' },
 ];
 
 export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ onClose, onSelectProduct }) => {
@@ -44,25 +38,11 @@ export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ onClose, onS
   };
 
   return (
-    <DropdownMenu ref={menuRef} role="menu" aria-label="Settings menu">
-      <DropdownSection>
-        {accountLinks.map(link => (
-          <DropdownItem
-            key={link.route}
-            role="menuitem"
-            onClick={() => handleNav(link.route, link.productId)}
-            tabIndex={0}
-            onKeyDown={e => { if (e.key === 'Enter') handleNav(link.route, link.productId); }}
-          >
-            {link.label}
-          </DropdownItem>
-        ))}
-      </DropdownSection>
-
+    <DropdownMenuWide ref={menuRef} role="menu" aria-label="Settings menu">
+      <DropdownHeader>Settings</DropdownHeader>
       <DropdownDivider />
-
       <DropdownSection>
-        {systemLinks.map(link => (
+        {settingsLinks.map(link => (
           <DropdownItem
             key={link.route}
             role="menuitem"
@@ -74,6 +54,6 @@ export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ onClose, onS
           </DropdownItem>
         ))}
       </DropdownSection>
-    </DropdownMenu>
+    </DropdownMenuWide>
   );
 };

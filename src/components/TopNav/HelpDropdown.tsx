@@ -12,11 +12,12 @@ interface HelpDropdownProps {
 }
 
 const helpLinks = [
-  { label: 'Documentation', href: '#' },
-  { label: 'Contact support', href: '#' },
-  { label: 'Video tutorials', href: '#' },
-  { label: 'Release notes', href: '#' },
-  { label: 'Community forum', href: '#' },
+  { label: 'AI Assist', href: '#' },
+  { label: "What's new", href: '#' },
+  { label: 'User guide', href: '#' },
+  { label: 'API guide', href: '#' },
+  { label: 'Knowledge base', href: '#' },
+  { label: 'Contact us', href: '#' },
 ];
 
 export const HelpDropdown: React.FC<HelpDropdownProps> = ({ onClose }) => {

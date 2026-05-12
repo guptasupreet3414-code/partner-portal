@@ -5,24 +5,23 @@ import {
   NavRight,
   NavDropdownWrapper,
   HamburgerWrapper,
-  LogoText,
+  HideOnMobile,
+  LogoImage,
   IconButton,
   CartBadge,
+  TopNavTooltip,
   UserAvatar,
 } from './TopNav.styles';
+import digicertOneLogo from '../../assets/dc-one-logo.png';
 import { SettingsDropdown } from './SettingsDropdown';
 import { HelpDropdown } from './HelpDropdown';
 import { ProfileDropdown } from './ProfileDropdown';
 import { CartPanel } from './CartPanel';
 import { AIAssistPanel } from './AIAssistPanel';
 import { TransparentBackdrop } from './TopNavDropdown.styles';
-import {
-  IconHamburger,
-  IconCart,
-  IconGear,
-  IconHelp,
-  IconSparkle,
-} from '../Icons';
+import { IconHamburger } from '../Icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCartShopping, faGear, faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 import type { ActiveTopNav } from '../../hooks/useNavState';
 
 interface TopNavProps {
@@ -61,10 +60,7 @@ export const TopNav: React.FC<TopNavProps> = ({
               <IconHamburger size={20} />
             </IconButton>
           </HamburgerWrapper>
-          <LogoText aria-label="DigiCert ONE">
-            <span className="logo-normal">digicert </span>
-            <span className="logo-bold">ONE</span>
-          </LogoText>
+          <LogoImage src={digicertOneLogo} alt="DigiCert ONE" />
         </NavLeft>
 
         <NavRight>
@@ -76,64 +72,62 @@ export const TopNav: React.FC<TopNavProps> = ({
               aria-haspopup="dialog"
               onClick={() => onOpenTopNav('cart')}
             >
-              <IconCart size={20} />
+              <FontAwesomeIcon icon={faCartShopping} style={{ fontSize: 20 }} />
               {cartCount > 0 && <CartBadge aria-hidden="true">{cartCount}</CartBadge>}
             </IconButton>
+            <TopNavTooltip role="tooltip" aria-hidden="true">Cart</TopNavTooltip>
           </NavDropdownWrapper>
 
-          {/* Settings gear → dropdown */}
-          <NavDropdownWrapper>
-            <IconButton
-              aria-label="Settings"
-              aria-expanded={activeTopNav === 'settings'}
-              aria-haspopup="menu"
-              onClick={() => onOpenTopNav('settings')}
-            >
-              <IconGear size={20} />
-            </IconButton>
-            {activeTopNav === 'settings' && (
-              <SettingsDropdown onClose={onCloseTopNav} onSelectProduct={onSelectProduct} />
-            )}
-          </NavDropdownWrapper>
+          {/* Settings / Help / Profile move into the hamburger drawer on mobile */}
+          <HideOnMobile>
+            {/* Settings gear → dropdown */}
+            <NavDropdownWrapper>
+              <IconButton
+                aria-label="Settings"
+                aria-expanded={activeTopNav === 'settings'}
+                aria-haspopup="menu"
+                onClick={() => onOpenTopNav('settings')}
+              >
+                <FontAwesomeIcon icon={faGear} style={{ fontSize: 20 }} />
+              </IconButton>
+              <TopNavTooltip role="tooltip" aria-hidden="true">Settings</TopNavTooltip>
+              {activeTopNav === 'settings' && (
+                <SettingsDropdown onClose={onCloseTopNav} onSelectProduct={onSelectProduct} />
+              )}
+            </NavDropdownWrapper>
 
-          {/* Help → dropdown */}
-          <NavDropdownWrapper>
-            <IconButton
-              aria-label="Help"
-              aria-expanded={activeTopNav === 'help'}
-              aria-haspopup="menu"
-              onClick={() => onOpenTopNav('help')}
-            >
-              <IconHelp size={20} />
-            </IconButton>
-            {activeTopNav === 'help' && (
-              <HelpDropdown onClose={onCloseTopNav} />
-            )}
-          </NavDropdownWrapper>
+            {/* Help → dropdown */}
+            <NavDropdownWrapper>
+              <IconButton
+                aria-label="Help"
+                aria-expanded={activeTopNav === 'help'}
+                aria-haspopup="menu"
+                onClick={() => onOpenTopNav('help')}
+              >
+                <FontAwesomeIcon icon={faCircleQuestion} style={{ fontSize: 20 }} />
+              </IconButton>
+              <TopNavTooltip role="tooltip" aria-hidden="true">Need help?</TopNavTooltip>
+              {activeTopNav === 'help' && (
+                <HelpDropdown onClose={onCloseTopNav} />
+              )}
+            </NavDropdownWrapper>
 
-          {/* AI Assist → push panel */}
-          <IconButton
-            aria-label="Open AI Assist"
-            aria-expanded={activeTopNav === 'ai-assist'}
-            onClick={() => onOpenTopNav('ai-assist')}
-          >
-            <IconSparkle size={20} />
-          </IconButton>
-
-          {/* User avatar → dropdown */}
-          <NavDropdownWrapper>
-            <UserAvatar
-              aria-label="User profile"
-              aria-expanded={activeTopNav === 'profile'}
-              aria-haspopup="menu"
-              onClick={() => onOpenTopNav('profile')}
-            >
-              D
-            </UserAvatar>
-            {activeTopNav === 'profile' && (
-              <ProfileDropdown onClose={onCloseTopNav} onSelectProduct={onSelectProduct} />
-            )}
-          </NavDropdownWrapper>
+            {/* User avatar → dropdown */}
+            <NavDropdownWrapper>
+              <UserAvatar
+                aria-label="User profile"
+                aria-expanded={activeTopNav === 'profile'}
+                aria-haspopup="menu"
+                onClick={() => onOpenTopNav('profile')}
+              >
+                D
+              </UserAvatar>
+              <TopNavTooltip role="tooltip" aria-hidden="true">Profile</TopNavTooltip>
+              {activeTopNav === 'profile' && (
+                <ProfileDropdown onClose={onCloseTopNav} onSelectProduct={onSelectProduct} />
+              )}
+            </NavDropdownWrapper>
+          </HideOnMobile>
         </NavRight>
       </TopNavBar>
 

@@ -8,8 +8,7 @@ import {
   RailButton,
   RailTooltip,
 } from './IconRail.styles';
-import { getProductIcon } from '../Icons';
-import { iconRailGroup1, iconRailGroup2, type IconRailProduct } from '../../data/navConfig';
+import { iconRailGroup1, iconRailGroup2, getProductLandingRoute, type IconRailProduct } from '../../data/navConfig';
 
 interface IconRailProps {
   activeProductId: string;
@@ -61,7 +60,7 @@ const RailItem: React.FC<{
   const handleClick = () => {
     hideTip();
     onSelect(product.id);
-    navigate(product.route);
+    navigate(getProductLandingRoute(product.id));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -90,7 +89,7 @@ const RailItem: React.FC<{
         aria-label={product.ariaLabel}
         aria-current={isActive ? 'page' : undefined}
       >
-        {getProductIcon(product.iconType, 20, isActive ? '#111827' : '#6B7280')}
+        <product.Icon aria-hidden="true" focusable="false" />
       </RailButton>
 
       {/*
@@ -115,7 +114,7 @@ const RailItem: React.FC<{
 
 export const IconRail: React.FC<IconRailProps> = ({ activeProductId, onSelectProduct }) => {
   return (
-    <RailContainer aria-label="Product navigation">
+    <RailContainer aria-label="Platform navigation">
       <RailGroup>
         {iconRailGroup1.map(product => (
           <RailItem

@@ -16,12 +16,27 @@ import {
   DrawerDivider,
   DrawerProductRow,
   DrawerProductLabel,
+  DrawerFooter,
+  DrawerFooterButton,
+  DrawerFooterIcon,
+  DrawerFooterLabel,
+  DrawerFooterAvatar,
 } from './NavDrawer.styles';
-import { getProductIcon, IconClose, IconChevronLeft, IconChevronRight } from '../Icons';
+import {
+  DropdownUserInfo,
+  DropdownUserName,
+  DropdownUserMeta,
+  DropdownUserEmail,
+  DropdownOrgEnv,
+} from '../TopNav/TopNavDropdown.styles';
+import { IconClose, IconChevronLeft } from '../Icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear, faCircleQuestion, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import {
   iconRailGroup1,
   iconRailGroup2,
   productNavConfig,
+  getProductLandingRoute,
   type IconRailProduct,
 } from '../../data/navConfig';
 
@@ -46,7 +61,7 @@ const DrawerItem: React.FC<{
 
   const handleClick = () => {
     onSelect(product.id);
-    navigate(product.route);
+    navigate(getProductLandingRoute(product.id));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -71,7 +86,13 @@ const DrawerItem: React.FC<{
         onKeyDown={handleKeyDown}
         aria-current={isActive ? 'page' : undefined}
       >
-        {getProductIcon(product.iconType, 18, isActive ? '#1976D2' : '#6B7280')}
+        <product.Icon
+          aria-hidden="true"
+          focusable="false"
+          width={18}
+          height={18}
+          color={isActive ? '#1976D2' : '#6B7280'}
+        />
         <DrawerProductLabel>{product.label}</DrawerProductLabel>
       </DrawerProductRow>
     </div>
@@ -93,7 +114,7 @@ const MobileL1Item: React.FC<{
     if (hasSubNav) {
       onDrill(product.id, source);
     } else {
-      navigate(product.route);
+      navigate(getProductLandingRoute(product.id));
       onSelect(product.id);
     }
   };
@@ -123,10 +144,19 @@ const MobileL1Item: React.FC<{
         aria-current={isActive ? 'page' : undefined}
         aria-haspopup={hasSubNav ? 'menu' : undefined}
       >
-        {getProductIcon(product.iconType, 18, isActive ? '#1976D2' : '#6B7280')}
+        <product.Icon
+          aria-hidden="true"
+          focusable="false"
+          width={18}
+          height={18}
+          color={isActive ? '#44484A' : '#6B7280'}
+        />
         <DrawerProductLabel>{product.label}</DrawerProductLabel>
         {hasSubNav && (
-          <IconChevronRight size={14} color={isActive ? '#1976D2' : '#9CA3AF'} />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            style={{ fontSize: 12, color: isActive ? '#44484A' : '#9CA3AF', flexShrink: 0 }}
+          />
         )}
       </DrawerProductRow>
     </div>
@@ -148,14 +178,17 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
   const drillSrcRef = useRef<HTMLButtonElement | null>(null);
 
   // Mobile drill-down state
+  type FooterKey = 'settings' | 'help' | 'profile';
   const [level, setLevel] = useState<'l1' | 'l2'>('l1');
   const [drillProductId, setDrillProductId] = useState<string | null>(null);
+  const [drillFooter, setDrillFooter] = useState<FooterKey | null>(null);
 
   // Always return to L1 when the drawer is closed
   useEffect(() => {
     if (!open) {
       setLevel('l1');
       setDrillProductId(null);
+      setDrillFooter(null);
     }
   }, [open]);
 
@@ -228,7 +261,19 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
   // Drill into a product's sub-nav
   const handleDrill = (productId: string, source: HTMLButtonElement) => {
     drillSrcRef.current = source;
+    setDrillFooter(null);
     setDrillProductId(productId);
+    setLevel('l2');
+    setTimeout(() => {
+      l2PaneRef.current?.querySelector<HTMLElement>('button, [href]')?.focus();
+    }, 50);
+  };
+
+  // Drill into a footer entry (Settings / Help / Profile)
+  const handleDrillFooter = (key: FooterKey) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    drillSrcRef.current = e.currentTarget;
+    setDrillProductId(null);
+    setDrillFooter(key);
     setLevel('l2');
     setTimeout(() => {
       l2PaneRef.current?.querySelector<HTMLElement>('button, [href]')?.focus();
@@ -244,6 +289,33 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
   };
 
   const drillProductNav = drillProductId ? productNavConfig[drillProductId] : null;
+
+  const footerL2Title: Record<FooterKey, string> = {
+    settings: 'Settings',
+    help: 'Need help?',
+    profile: 'Profile',
+  };
+
+  const settingsItems = [
+    { label: 'User management', route: '/settings/users' },
+    { label: 'Billing and subscriptions', route: '/settings/billing' },
+    { label: 'Account settings', route: '/settings/account' },
+  ];
+
+  const helpItems = [
+    { label: 'AI Assist' },
+    { label: "What's new" },
+    { label: 'User guide' },
+    { label: 'API guide' },
+    { label: 'Knowledge base' },
+    { label: 'Contact us' },
+  ];
+
+  const profileItems = [
+    { label: 'View my profile', route: '/profile' },
+    { label: 'View environments', route: '/environments' },
+    { label: 'Sign out', route: null as string | null },
+  ];
 
   return (
     <>
@@ -270,7 +342,7 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
               aria-hidden={level !== 'l1'}
             >
               <DrawerPaneHeader>
-                <DrawerPaneTitle>Navigation</DrawerPaneTitle>
+                <DrawerPaneTitle>Products</DrawerPaneTitle>
                 <DrawerIconButton onClick={onClose} aria-label="Close menu">
                   <IconClose size={16} color="currentColor" />
                 </DrawerIconButton>
@@ -307,6 +379,41 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
                   </DrawerGroup>
                 </nav>
               </DrawerPaneScroll>
+
+              {/* Fixed footer: top-nav actions surfaced inside the drawer */}
+              <DrawerFooter>
+                <DrawerFooterButton
+                  type="button"
+                  onClick={handleDrillFooter('settings')}
+                  aria-haspopup="menu"
+                >
+                  <DrawerFooterIcon aria-hidden="true">
+                    <FontAwesomeIcon icon={faGear} />
+                  </DrawerFooterIcon>
+                  <DrawerFooterLabel>Settings</DrawerFooterLabel>
+                  <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: 12, flexShrink: 0 }} />
+                </DrawerFooterButton>
+                <DrawerFooterButton
+                  type="button"
+                  onClick={handleDrillFooter('help')}
+                  aria-haspopup="menu"
+                >
+                  <DrawerFooterIcon aria-hidden="true">
+                    <FontAwesomeIcon icon={faCircleQuestion} />
+                  </DrawerFooterIcon>
+                  <DrawerFooterLabel>Need help?</DrawerFooterLabel>
+                  <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: 12, flexShrink: 0 }} />
+                </DrawerFooterButton>
+                <DrawerFooterButton
+                  type="button"
+                  onClick={handleDrillFooter('profile')}
+                  aria-haspopup="menu"
+                >
+                  <DrawerFooterAvatar aria-hidden="true">D</DrawerFooterAvatar>
+                  <DrawerFooterLabel>Profile</DrawerFooterLabel>
+                  <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: 12, flexShrink: 0 }} />
+                </DrawerFooterButton>
+              </DrawerFooter>
             </DrawerPane>
 
             {/* Level 2 — sub-nav for the drilled product */}
@@ -319,7 +426,9 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
                 <DrawerIconButton onClick={handleBack} aria-label="Back to menu">
                   <IconChevronLeft size={16} color="currentColor" />
                 </DrawerIconButton>
-                <DrawerPaneTitle>{drillProductNav?.label ?? ''}</DrawerPaneTitle>
+                <DrawerPaneTitle>
+                  {drillProductNav?.label ?? (drillFooter && footerL2Title[drillFooter]) ?? ''}
+                </DrawerPaneTitle>
                 <DrawerIconButton onClick={onClose} aria-label="Close menu">
                   <IconClose size={16} color="currentColor" />
                 </DrawerIconButton>
@@ -352,6 +461,71 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
                       </div>
                     ))}
                   </nav>
+                )}
+
+                {drillFooter === 'settings' && (
+                  <nav aria-label="Settings menu">
+                    {settingsItems.map(item => (
+                      <DrawerSubNavLink
+                        key={item.route}
+                        to={item.route}
+                        $active={location.pathname === item.route}
+                        onClick={onClose}
+                      >
+                        {item.label}
+                      </DrawerSubNavLink>
+                    ))}
+                  </nav>
+                )}
+
+                {drillFooter === 'help' && (
+                  <nav aria-label="Help menu">
+                    {helpItems.map(item => (
+                      <DrawerFooterButton
+                        key={item.label}
+                        type="button"
+                        onClick={onClose}
+                      >
+                        <DrawerFooterLabel>{item.label}</DrawerFooterLabel>
+                      </DrawerFooterButton>
+                    ))}
+                  </nav>
+                )}
+
+                {drillFooter === 'profile' && (
+                  <>
+                    <DropdownUserInfo>
+                      <DropdownUserName>Deepika Chauhan</DropdownUserName>
+                      <DropdownUserMeta>dchauhan</DropdownUserMeta>
+                      <DropdownUserEmail>d.chauhan@example.com</DropdownUserEmail>
+                      <DropdownOrgEnv>
+                        <span>Acme Corp</span>
+                        <span>Production</span>
+                      </DropdownOrgEnv>
+                    </DropdownUserInfo>
+                    <nav aria-label="Profile menu">
+                      {profileItems.map(item => (
+                        item.route ? (
+                          <DrawerSubNavLink
+                            key={item.label}
+                            to={item.route}
+                            $active={location.pathname === item.route}
+                            onClick={onClose}
+                          >
+                            {item.label}
+                          </DrawerSubNavLink>
+                        ) : (
+                          <DrawerFooterButton
+                            key={item.label}
+                            type="button"
+                            onClick={onClose}
+                          >
+                            <DrawerFooterLabel>{item.label}</DrawerFooterLabel>
+                          </DrawerFooterButton>
+                        )
+                      ))}
+                    </nav>
+                  </>
                 )}
               </DrawerPaneScroll>
             </DrawerPane>

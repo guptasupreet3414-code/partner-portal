@@ -60,16 +60,24 @@ export const theme = {
     default: 'all 0.2s ease',
     panel: '0.2s ease',
   },
-  // Breakpoints are not in the original design tokens — added for the
-  // responsive nav pattern. Values are px integers for use in JS; media
-  // queries in styled-components must still hardcode these strings.
+  // Breakpoint system matching the DigiCert design tokens.
+  // Values are px integers for use in JS; media queries in styled-components
+  // must still hardcode these strings.
+  //
+  // Navigation modes derived from these boundaries:
+  //   < medium (640)   → drawer mode (hamburger, no rail)
+  //   medium–large     → overlay spoke (rail + spoke overlays content)
+  //   ≥ large (1024)   → push spoke (rail + spoke shifts content)
   breakpoints: {
-    mobile: 768,   // < 768px  → mobile
-    tablet: 1024,  // 768–1023 → tablet, ≥ 1024 → desktop
+    xsmall: 0,
+    small: 480,
+    medium: 640,
+    large: 1024,
+    xlarge: 1280,
   },
   layout: {
     topNavHeight: '56px',
-    iconRailWidth: '56px',
+    iconRailWidth: '72px',
     subNavWidth: '220px',
   },
 } as const;

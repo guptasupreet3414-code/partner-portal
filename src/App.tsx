@@ -4,8 +4,10 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { TopNav } from './components/TopNav/TopNav';
 import { LeftNav } from './components/LeftNav/LeftNav';
 import { StubPage } from './pages/StubPage';
+import { ExplorePage } from './pages/ExplorePage';
 import { useNavState } from './hooks/useNavState';
-import { useBreakpoint } from './hooks/useBreakpoint';
+import { useBreakpoint, getNavMode } from './hooks/useBreakpoint';
+import { exploreProductIds, productNavConfig } from './data/navConfig';
 
 const GlobalStyle = createGlobalStyle`
   *, *::before, *::after {
@@ -59,18 +61,30 @@ const ContentArea = styled.div<{ $leftOffset: string; $rightOffset: string }>`
   left: ${({ $leftOffset }) => $leftOffset};
   right: ${({ $rightOffset }) => $rightOffset};
   bottom: 0;
+  padding: 16px;
   background: ${({ theme }) => theme.colors.white};
   overflow-y: auto;
   transition: left 0.2s ease, right 0.2s ease;
 
-  /* Tablet: spoke overlays content — clear only the icon rail, not the spoke */
-  @media (max-width: 1023px) and (min-width: 768px) {
+  /* medium: tablet — spoke overlays content; rail visible */
+  @media (min-width: 640px) and (max-width: 1023px) {
     left: ${({ theme }) => theme.layout.iconRailWidth};
     right: 0;
+    padding: 24px;
   }
 
-  /* Mobile: no icon rail, full width */
-  @media (max-width: 767px) {
+  /* large: small desktop — spoke pushes content */
+  @media (min-width: 1024px) {
+    padding: 32px;
+  }
+
+  /* xlarge: more generous breathing room */
+  @media (min-width: 1280px) {
+    padding: 40px;
+  }
+
+  /* drawer mode (< medium): no icon rail, full width */
+  @media (max-width: 639px) {
     left: 0;
     right: 0;
   }
@@ -221,13 +235,14 @@ export const App: React.FC = () => {
     closeTopNav,
   } = useNavState();
 
-  const mode = useBreakpoint();
-  const isMobile = mode === 'mobile';
+  const breakpoint = useBreakpoint();
+  const navMode = getNavMode(breakpoint);
+  const isMobile = navMode === 'drawer';
 
-  // Close the drawer if the viewport grows beyond mobile
+  // Close the drawer if the viewport grows beyond drawer mode
   useEffect(() => {
-    if (mode !== 'mobile' && isDrawerOpen) closeDrawer();
-  }, [mode, isDrawerOpen, closeDrawer]);
+    if (navMode !== 'drawer' && isDrawerOpen) closeDrawer();
+  }, [navMode, isDrawerOpen, closeDrawer]);
 
   // Make the main content area inert while the mobile drawer is open so that
   // screen readers and keyboard users cannot reach content behind the overlay.
@@ -245,7 +260,9 @@ export const App: React.FC = () => {
   }, [isMobile, isDrawerOpen]);
 
   // Desktop: content shifts right when spoke is open. Tablet/mobile: CSS overrides.
-  const leftOffset = isSpokeOpen ? '276px' : '56px';
+  // Explore products have no spoke — content fills the area right of the icon rail.
+  const hasSpoke = Boolean(productNavConfig[activeProductId]);
+  const leftOffset = isSpokeOpen && hasSpoke ? '276px' : '72px';
   const rightOffset = activeTopNav === 'ai-assist' ? '400px' : '0px';
 
   return (
@@ -281,7 +298,10 @@ export const App: React.FC = () => {
       >
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          {allRoutes.filter(r => r !== '/').map(route => (
+          {[...exploreProductIds].map(id => (
+            <Route key={id} path={`/${id}`} element={<ExplorePage productId={id} />} />
+          ))}
+          {allRoutes.filter(r => r !== '/' && ![...exploreProductIds].some(id => r === `/${id}` || r.startsWith(`/${id}/`))).map(route => (
             <Route key={route} path={route} element={<StubPage />} />
           ))}
           <Route path="*" element={<StubPage />} />

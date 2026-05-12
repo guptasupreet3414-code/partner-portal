@@ -5,7 +5,7 @@ import { IconChevronDown, IconChevronUp } from '../Icons';
 import type { NavSection as NavSectionType } from '../../data/navConfig';
 
 const SectionWrapper = styled.div`
-  margin-bottom: 2px;
+  margin: 0 8px 2px;
 `;
 
 const SectionHeader = styled.button<{ $hasTitle: boolean }>`
@@ -13,26 +13,59 @@ const SectionHeader = styled.button<{ $hasTitle: boolean }>`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 6px 12px 6px 16px;
+  height: 40px;
+  padding: 0 12px 0 16px;
   border: none;
   background: transparent;
   cursor: pointer;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.neutral700};
+  color: #757D82;
   transition: color 0.15s;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.neutral900};
+    color: #44484A;
   }
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.blue300};
     outline-offset: -2px;
   }
+`;
+
+const HeaderTitle = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+`;
+
+const HeaderRight = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+`;
+
+const NewBadge = styled.span`
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #E2EEFF;
+  color: #0048AC;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 const ItemsContainer = styled.div<{ $open: boolean }>`
@@ -42,31 +75,65 @@ const ItemsContainer = styled.div<{ $open: boolean }>`
 `;
 
 const NavItem = styled(NavLink)`
-  display: block;
-  padding: 7px 12px 7px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px 0 20px;
+  overflow: hidden;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px;
+  font-size: 14px;
   color: ${({ theme }) => theme.colors.neutral700};
   text-decoration: none;
+  border-radius: 4px;
   transition: background 0.12s, color 0.12s;
-  border-radius: 0;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral200};
-    color: ${({ theme }) => theme.colors.neutral900};
+    background: #F0F3F5;
   }
 
   &.active,
   &[aria-current='page'] {
-    background: ${({ theme }) => theme.colors.blue300};
-    color: ${({ theme }) => theme.colors.white};
+    background: #F0F3F5;
+    color: #44484A;
     font-weight: 500;
+  }
+
+  &:active {
+    background: #E7EBEF;
+    color: #353535;
   }
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.blue300};
     outline-offset: -2px;
   }
+`;
+
+const ItemLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const NumberBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #636A6E;
+  color: #ffffff;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  flex-shrink: 0;
 `;
 
 interface NavSectionProps {
@@ -89,8 +156,11 @@ export const NavSection: React.FC<NavSectionProps> = ({ section, index }) => {
         aria-expanded={open}
         aria-controls={sectionId}
       >
-        <span>{section.title}</span>
-        {open ? <IconChevronUp size={12} color="currentColor" /> : <IconChevronDown size={12} color="currentColor" />}
+        <HeaderTitle>{section.title}</HeaderTitle>
+        <HeaderRight>
+          {section.badge && <NewBadge>New</NewBadge>}
+          {open ? <IconChevronUp size={12} color="currentColor" /> : <IconChevronDown size={12} color="currentColor" />}
+        </HeaderRight>
       </SectionHeader>
 
       <ItemsContainer
@@ -104,7 +174,11 @@ export const NavSection: React.FC<NavSectionProps> = ({ section, index }) => {
             end
             aria-current={location.pathname === item.route ? 'page' : undefined}
           >
-            {item.label}
+            <ItemLabel>{item.label}</ItemLabel>
+            {item.numberBadge !== undefined && (
+              <NumberBadge aria-label={`${item.numberBadge} items`}>{item.numberBadge}</NumberBadge>
+            )}
+            {item.badge && <NewBadge>New</NewBadge>}
           </NavItem>
         ))}
       </ItemsContainer>

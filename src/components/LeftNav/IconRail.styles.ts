@@ -6,7 +6,7 @@ export const RailContainer = styled.nav`
   left: 0;
   bottom: 0;
   width: ${({ theme }) => theme.layout.iconRailWidth};
-  background: #E8EAED;
+  background: #E7EBEF;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,7 +16,7 @@ export const RailContainer = styled.nav`
   overflow: hidden;
 
   /* Icon rail has no purpose on mobile — full nav is in the hamburger drawer */
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     display: none;
   }
 `;
@@ -38,32 +38,31 @@ export const RailDivider = styled.hr`
 
 export const RailButton = styled.button<{ $active: boolean }>`
   position: relative;
-  width: 100%;
-  height: 44px;
+  width: 56px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  background: ${({ $active }) => ($active ? '#D1D5DB' : 'transparent')};
+  border-radius: 4px;
+  background: ${({ $active }) => ($active ? '#D6DCE1' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#44484A' : '#757D82')};
   cursor: pointer;
-  color: ${({ $active }) => ($active ? '#1976D2' : '#6B7280')};
   transition: background 0.15s ease, color 0.15s ease;
 
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 28px;
-    background: ${({ $active }) => ($active ? '#1976D2' : 'transparent')};
-    border-radius: 0 2px 2px 0;
-    transition: background 0.15s ease;
+  & > svg {
+    width: 20px;
+    height: 20px;
+    display: block;
   }
 
   &:hover {
-    background: ${({ $active }) => ($active ? '#D1D5DB' : '#CDD0D5')};
+    background: #D6DCE1;
+  }
+
+  &:active {
+    background: #C1C8CD;
+    color: #353535;
   }
 
   &:focus-visible {
@@ -99,7 +98,7 @@ export const RailTooltip = styled.span<{ $visible: boolean }>`
   z-index: 950;
 
   /* No tooltip logic on mobile — the rail itself is hidden there */
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     display: none;
   }
 

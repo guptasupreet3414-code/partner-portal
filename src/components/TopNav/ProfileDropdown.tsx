@@ -4,7 +4,9 @@ import {
   DropdownMenuWide,
   DropdownUserInfo,
   DropdownUserName,
+  DropdownUserMeta,
   DropdownUserEmail,
+  DropdownOrgEnv,
   DropdownSection,
   DropdownItem,
   DropdownDivider,
@@ -36,7 +38,12 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, onSel
     <DropdownMenuWide role="menu" aria-label="User profile menu">
       <DropdownUserInfo>
         <DropdownUserName>Deepika Chauhan</DropdownUserName>
+        <DropdownUserMeta>dchauhan</DropdownUserMeta>
         <DropdownUserEmail>d.chauhan@example.com</DropdownUserEmail>
+        <DropdownOrgEnv>
+          <span>Acme Corp</span>
+          <span>Production</span>
+        </DropdownOrgEnv>
       </DropdownUserInfo>
 
       <DropdownDivider />
@@ -48,15 +55,15 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, onSel
           tabIndex={0}
           onKeyDown={e => { if (e.key === 'Enter') handleNav('/profile', 'profile'); }}
         >
-          My profile
+          View my profile
         </DropdownItem>
         <DropdownItem
           role="menuitem"
-          onClick={() => handleNav('/settings/account', 'settings-account')}
+          onClick={() => handleNav('/environments', 'environments')}
           tabIndex={0}
-          onKeyDown={e => { if (e.key === 'Enter') handleNav('/settings/account', 'settings-account'); }}
+          onKeyDown={e => { if (e.key === 'Enter') handleNav('/environments', 'environments'); }}
         >
-          Account settings
+          View environments
         </DropdownItem>
       </DropdownSection>
 

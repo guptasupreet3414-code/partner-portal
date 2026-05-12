@@ -16,7 +16,7 @@ export const SubNavWrapper = styled.div<{ $open: boolean }>`
   };
 
   /* No spoke on mobile — full nav is in the hamburger drawer */
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     display: none;
   }
 
@@ -56,14 +56,17 @@ export const SubNavInner = styled.div<{ $open: boolean }>`
 `;
 
 export const SubNavHeader = styled.div`
-  padding: 14px 16px 10px;
+  display: flex;
+  align-items: center;
+  height: ${({ theme }) => theme.layout.topNavHeight};
+  padding: 0 16px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral300};
   flex-shrink: 0;
 `;
 
 export const SubNavTitle = styled.h2`
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.neutral900};
   margin: 0;
@@ -73,6 +76,7 @@ export const SubNavScrollArea = styled.div`
   flex: 1;
   overflow-y: auto;
   padding: 8px 0;
+  background: #F9FAFB;
 
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb {
@@ -81,38 +85,73 @@ export const SubNavScrollArea = styled.div`
   }
 `;
 
-/* Single chevron positioned outside the clip layer; rotates 180° when spoke closes */
-export const ChevronButton = styled.button<{ $open: boolean }>`
+export const ChevronTooltip = styled.span`
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.82);
+  color: #ffffff;
+  font-size: 12px;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  padding: 4px 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.default};
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  z-index: 11;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 1ms;
+  }
+`;
+
+/*
+ * Wrapper sits on the right edge of the spoke, centered with the header.
+ * Hover/focus on the wrapper reveals the tooltip via the sibling rule below.
+ */
+export const ChevronWrapper = styled.div`
   position: absolute;
   right: -12px;
-  top: 24px;
+  top: 16px;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.colors.neutral300};
-  background: ${({ theme }) => theme.colors.white};
+  z-index: 10;
+
+  &:hover ${ChevronTooltip},
+  &:focus-within ${ChevronTooltip} {
+    opacity: 1;
+  }
+`;
+
+export const ChevronButton = styled.button`
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
   color: ${({ theme }) => theme.colors.neutral600};
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  transform: ${({ $open }) => ($open ? 'rotate(0deg)' : 'rotate(180deg)')};
-  transition: background 0.15s, color 0.15s, transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.15s;
+  padding: 0;
+
+  & > svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
     color: ${({ theme }) => theme.colors.neutral900};
   }
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.blue300};
     outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition-duration: 1ms;
+    border-radius: 2px;
   }
 `;
 
@@ -124,7 +163,7 @@ export const ChevronButton = styled.button<{ $open: boolean }>`
 export const SpokeBackdrop = styled.div<{ $visible: boolean }>`
   display: none;
 
-  @media (max-width: 1023px) and (min-width: 768px) {
+  @media (min-width: 640px) and (max-width: 1023px) {
     display: ${({ $visible }) => ($visible ? 'block' : 'none')};
     position: fixed;
     top: ${({ theme }) => theme.layout.topNavHeight};

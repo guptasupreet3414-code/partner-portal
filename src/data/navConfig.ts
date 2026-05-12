@@ -1,12 +1,33 @@
+import type { FunctionComponent, SVGProps } from 'react';
+import OverviewIcon from '../assets/overview.svg?react';
+import QuantumCentralIcon from '../assets/quantum-central.svg?react';
+import CertcentralIcon from '../assets/certcentral.svg?react';
+import PrivateCaIcon from '../assets/private-ca.svg?react';
+import TrustLifecycleIcon from '../assets/trust-lifecycle.svg?react';
+import SoftwareTrustIcon from '../assets/software-trust.svg?react';
+import DigicertDnsIcon from '../assets/digicert-dns.svg?react';
+import ContentTrustIcon from '../assets/content-trust.svg?react';
+import DeviceTrustIcon from '../assets/device-trust.svg?react';
+import AiAgentsIcon from '../assets/ai-agents.svg?react';
+import ValimailIcon from '../assets/valimail.svg?react';
+
+export type IconComponent = FunctionComponent<SVGProps<SVGSVGElement>>;
+
 export interface NavItem {
   label: string;
   route: string;
+  /** Renders a "New" badge. Use on at most 2 items per product. */
+  badge?: boolean;
+  /** Renders a circular number badge to the left of the label. Use on at most 1 item per product. */
+  numberBadge?: number;
 }
 
 export interface NavSection {
   title: string;
   defaultExpanded?: boolean;
   items: NavItem[];
+  /** Renders a "New" badge in the accordion header. Use on at most one section per product. */
+  badge?: boolean;
 }
 
 export interface ProductNav {
@@ -22,25 +43,81 @@ export interface IconRailProduct {
   label: string;
   route: string;
   ariaLabel: string;
-  iconType: string;
+  Icon: IconComponent;
 }
 
 export const iconRailGroup1: IconRailProduct[] = [
-  { id: 'dashboard', label: 'Dashboard', route: '/dashboard', ariaLabel: 'Dashboard', iconType: 'dashboard' },
-  { id: 'quantum-central', label: 'Quantum Central', route: '/quantum-central', ariaLabel: 'Quantum Central', iconType: 'settings' },
-  { id: 'certcentral', label: 'CertCentral', route: '/certcentral', ariaLabel: 'CertCentral', iconType: 'shield' },
-  { id: 'private-ca', label: 'Private CA', route: '/private-ca', ariaLabel: 'Private CA', iconType: 'hierarchy' },
-  { id: 'trust-lifecycle', label: 'Trust Lifecycle', route: '/trust-lifecycle', ariaLabel: 'Trust Lifecycle', iconType: 'cycle' },
-  { id: 'software-trust', label: 'Software Trust', route: '/software-trust', ariaLabel: 'Software Trust', iconType: 'code' },
+  { id: 'dashboard', label: 'Overview', route: '/dashboard', ariaLabel: 'Overview', Icon: OverviewIcon },
+  { id: 'quantum-central', label: 'Quantum Central', route: '/quantum-central', ariaLabel: 'Quantum Central', Icon: QuantumCentralIcon },
+  { id: 'certcentral', label: 'CertCentral', route: '/certcentral', ariaLabel: 'CertCentral', Icon: CertcentralIcon },
+  { id: 'private-ca', label: 'Private CA', route: '/private-ca', ariaLabel: 'Private CA', Icon: PrivateCaIcon },
+  { id: 'trust-lifecycle', label: 'Trust Lifecycle', route: '/trust-lifecycle', ariaLabel: 'Trust Lifecycle', Icon: TrustLifecycleIcon },
+  { id: 'software-trust', label: 'Software Trust', route: '/software-trust', ariaLabel: 'Software Trust', Icon: SoftwareTrustIcon },
+  { id: 'dns', label: 'DigiCert DNS', route: '/dns', ariaLabel: 'DigiCert DNS', Icon: DigicertDnsIcon },
+  { id: 'content-trust', label: 'Content Trust', route: '/content-trust', ariaLabel: 'Content Trust', Icon: ContentTrustIcon },
+  { id: 'device-trust', label: 'Device Trust', route: '/device-trust', ariaLabel: 'Device Trust', Icon: DeviceTrustIcon },
 ];
 
+/* "Explore" products — user does not have access. Clicking renders a landing page instead of a spoke nav. */
 export const iconRailGroup2: IconRailProduct[] = [
-  { id: 'dns', label: 'DNS', route: '/dns', ariaLabel: 'DNS Trust', iconType: 'globe' },
-  { id: 'content-trust', label: 'Content Trust', route: '/content-trust', ariaLabel: 'Content Trust', iconType: 'document' },
-  { id: 'device-trust', label: 'Device Trust', route: '/device-trust', ariaLabel: 'Device Trust', iconType: 'mobile' },
-  { id: 'ai-agents', label: 'AI Agents', route: '/ai-agents', ariaLabel: 'AI Agents', iconType: 'sparkle' },
-  { id: 'valimail', label: 'Valimail', route: '/valimail', ariaLabel: 'Valimail', iconType: 'envelope' },
+  { id: 'ai-agents', label: 'AI Agents', route: '/ai-agents', ariaLabel: 'AI Agents', Icon: AiAgentsIcon },
+  { id: 'valimail', label: 'Valimail', route: '/valimail', ariaLabel: 'Valimail', Icon: ValimailIcon },
 ];
+
+export const exploreProductIds = new Set(iconRailGroup2.map(p => p.id));
+
+export interface ExploreFeature {
+  title: string;
+  description: string;
+}
+
+export interface ExploreProduct {
+  id: string;
+  name: string;
+  tagline: string;
+  features: ExploreFeature[];
+}
+
+export const exploreProducts: Record<string, ExploreProduct> = {
+  'ai-agents': {
+    id: 'ai-agents',
+    name: 'AI Agents',
+    tagline: 'Establish trust for autonomous AI agents acting on behalf of your organization.',
+    features: [
+      {
+        title: 'Verifiable agent identity',
+        description: 'Issue cryptographic identities to every agent so downstream systems can verify who is acting and on whose authority.',
+      },
+      {
+        title: 'Signed actions',
+        description: 'Cryptographically sign every agent decision and tool call to produce a tamper-evident audit trail.',
+      },
+      {
+        title: 'Policy enforcement',
+        description: 'Define guardrails for what agents can do and revoke access in real time when behavior drifts.',
+      },
+    ],
+  },
+  valimail: {
+    id: 'valimail',
+    name: 'Valimail',
+    tagline: 'Stop email impersonation and protect your brand with automated email authentication.',
+    features: [
+      {
+        title: 'DMARC enforcement',
+        description: 'Move from monitoring to full enforcement without breaking legitimate mail flows.',
+      },
+      {
+        title: 'Sender authentication',
+        description: 'Continuously verify SPF, DKIM, and DMARC for every sender across your domains.',
+      },
+      {
+        title: 'Brand indicators',
+        description: 'Display your verified logo in inboxes that support BIMI to reinforce trust at a glance.',
+      },
+    ],
+  },
+};
 
 const stubNav = (id: string): NavSection[] => [
   {
@@ -56,15 +133,15 @@ const stubNav = (id: string): NavSection[] => [
 export const productNavConfig: Record<string, ProductNav> = {
   dashboard: {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'Overview',
     route: '/dashboard',
-    ariaLabel: 'Dashboard navigation',
+    ariaLabel: 'Overview navigation',
     sections: [
       {
         title: '',
         defaultExpanded: true,
         items: [
-          { label: 'Value dashboard', route: '/dashboard' },
+          { label: 'Home', route: '/dashboard' },
           { label: 'Clients tools insights', route: '/dashboard/clients-tools' },
         ],
       },
@@ -78,11 +155,15 @@ export const productNavConfig: Record<string, ProductNav> = {
     ariaLabel: 'Quantum Central navigation',
     sections: [
       {
-        title: 'OVERVIEW',
+        title: '',
         defaultExpanded: true,
         items: [
           { label: 'Dashboard', route: '/quantum-central/dashboard' },
-          { label: 'Settings', route: '/quantum-central/settings' },
+          { label: 'Inventory', route: '/quantum-central/inventory' },
+          { label: 'Violations', route: '/quantum-central/violations' },
+          { label: 'Integrations', route: '/quantum-central/integrations' },
+          { label: 'Learn PQC', route: '/quantum-central/learn-pqc' },
+          { label: 'Product Settings', route: '/quantum-central/product-settings' },
         ],
       },
     ],
@@ -95,53 +176,100 @@ export const productNavConfig: Record<string, ProductNav> = {
     ariaLabel: 'CertCentral navigation',
     sections: [
       {
+        title: '',
+        items: [
+          { label: 'Request a certificate', route: '/certcentral/request-a-certificate' },
+        ],
+      },
+      {
         title: 'OVERVIEW',
         defaultExpanded: true,
         items: [
           { label: 'Dashboard', route: '/certcentral/dashboard' },
-          { label: 'Reports', route: '/certcentral/reports' },
+          { label: 'Reports', route: '/certcentral/reports', numberBadge: 12 },
           { label: 'Audit logs', route: '/certcentral/audit-logs' },
         ],
       },
       {
-        title: 'INVENTORY',
+        title: 'CERTIFICATES',
         items: [
-          { label: 'Inventory', route: '/certcentral/inventory' },
-          { label: 'Trust store', route: '/certcentral/trust-store' },
+          { label: 'Orders', route: '/certcentral/orders' },
+          { label: 'Requests', route: '/certcentral/requests' },
+          { label: 'Expiring Certificates', route: '/certcentral/expiring-certificates' },
+          { label: 'Certificate Authority', route: '/certcentral/certificate-authority' },
         ],
       },
       {
-        title: 'POLICIES',
+        title: 'VALIDATION',
         items: [
-          { label: 'Certificate profiles', route: '/certcentral/certificate-profiles' },
-          { label: 'Certificate templates', route: '/certcentral/certificate-templates' },
-          { label: 'Alert rules', route: '/certcentral/alert-rules' },
-          { label: 'Workflow rules', route: '/certcentral/workflow-rules' },
+          { label: 'Domains', route: '/certcentral/domains' },
+          { label: 'Organizations', route: '/certcentral/organizations' },
         ],
       },
       {
-        title: 'AUTOMATION',
+        title: 'FINANCES',
         items: [
-          { label: 'Agents', route: '/certcentral/agents' },
-          { label: 'Sensors', route: '/certcentral/sensors' },
-          { label: 'Network scans', route: '/certcentral/network-scans' },
-          { label: 'Scripts', route: '/certcentral/scripts' },
+          { label: 'Purchase history', route: '/certcentral/purchase-history' },
+          { label: 'Balance history', route: '/certcentral/balance-history' },
+          { label: 'Account pricing', route: '/certcentral/account-pricing' },
+          { label: 'Deposit funds', route: '/certcentral/deposit-funds' },
+          { label: 'Voucher codes', route: '/certcentral/voucher-codes' },
+          { label: 'Pay invoice', route: '/certcentral/pay-invoice' },
+          { label: 'Purchase orders and invoices', route: '/certcentral/purchase-orders-and-invoices' },
+          { label: 'Quotes', route: '/certcentral/quotes' },
+          { label: 'Credit cards', route: '/certcentral/credit-cards' },
+          { label: 'Settings', route: '/certcentral/finance-settings' },
+        ],
+      },
+      {
+        title: 'SUBACCOUNTS',
+        items: [
+          { label: 'Subaccounts', route: '/certcentral/subaccounts' },
+          { label: 'Orders', route: '/certcentral/subaccounts-orders' },
+        ],
+      },
+      {
+        title: 'TOOLS',
+        items: [
+          { label: 'SSL installation tool', route: '/certcentral/ssl-installation-tool' },
+          { label: 'Certificate utility', route: '/certcentral/certificate-utility' },
+          { label: 'CSR generators', route: '/certcentral/csr-generators' },
         ],
       },
       {
         title: 'INTEGRATIONS',
         items: [
-          { label: 'Connectors', route: '/certcentral/connectors' },
-          { label: 'Client tools', route: '/certcentral/client-tools' },
+          { label: 'ACME Directory URLs', route: '/certcentral/acme-directory-urls' },
+          { label: 'API Keys', route: '/certcentral/api-keys' },
+          { label: 'Webhooks', route: '/certcentral/webhooks' },
+          { label: 'Integrate with Ultra DNS', route: '/certcentral/ultra-dns' },
+        ],
+      },
+      {
+        title: 'ACCOUNT',
+        items: [
+          { label: 'Users', route: '/certcentral/users' },
+          { label: 'Service users', route: '/certcentral/service-users' },
+          { label: 'Divisions', route: '/certcentral/divisions' },
+          { label: 'Guest access', route: '/certcentral/guest-access' },
+          { label: 'User invitations', route: '/certcentral/user-invitations' },
         ],
       },
       {
         title: 'CONFIGURATION',
         items: [
+          { label: 'Preferences', route: '/certcentral/preferences' },
+          { label: 'Notifications', route: '/certcentral/notifications' },
+          { label: 'Authentication settings', route: '/certcentral/authentication-settings' },
+          { label: 'IP restrictions', route: '/certcentral/ip-restrictions' },
           { label: 'Product settings', route: '/certcentral/product-settings' },
-          { label: 'Alert destinations', route: '/certcentral/alert-destinations' },
-          { label: 'Business units', route: '/certcentral/business-units' },
-          { label: 'Seats', route: '/certcentral/seats' },
+          { label: 'Custom order fields', route: '/certcentral/custom-order-fields' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Standard Support', route: '/certcentral/standard-support' },
         ],
       },
     ],
@@ -158,44 +286,48 @@ export const productNavConfig: Record<string, ProductNav> = {
         defaultExpanded: true,
         items: [
           { label: 'Dashboard', route: '/trust-lifecycle/dashboard' },
-          { label: 'Alerts', route: '/trust-lifecycle/alerts' },
           { label: 'Reports', route: '/trust-lifecycle/reports' },
           { label: 'Audit logs', route: '/trust-lifecycle/audit-logs' },
         ],
       },
       {
-        title: 'RELEASE SECURITY',
+        title: 'INVENTORY',
         items: [
-          { label: 'Releases', route: '/trust-lifecycle/releases' },
-          { label: 'Threat scanning', route: '/trust-lifecycle/threat-scanning' },
+          { label: 'Certificates', route: '/trust-lifecycle/certificates' },
+          { label: 'Trust stores', route: '/trust-lifecycle/trust-stores' },
         ],
       },
       {
-        title: 'SIGNING',
+        title: 'POLICIES',
         items: [
-          { label: 'Keypairs', route: '/trust-lifecycle/keypairs' },
-          { label: 'Key rotations', route: '/trust-lifecycle/key-rotations' },
-          { label: 'Keypair profiles', route: '/trust-lifecycle/keypair-profiles' },
-          { label: 'GPG keypairs', route: '/trust-lifecycle/gpg-keypairs' },
-          { label: 'Certificates', route: '/trust-lifecycle/certificates' },
           { label: 'Certificate profiles', route: '/trust-lifecycle/certificate-profiles' },
-          { label: 'CertCentral orders', route: '/trust-lifecycle/certcentral-orders' },
+          { label: 'Certificate templates', route: '/trust-lifecycle/certificate-templates' },
+          { label: 'Alerts', route: '/trust-lifecycle/alerts' },
+          { label: 'Rules', route: '/trust-lifecycle/rules' },
+        ],
+      },
+      {
+        title: 'DISCOVERY & AUTOMATION',
+        items: [
+          { label: 'Agents', route: '/trust-lifecycle/agents' },
+          { label: 'Sensors', route: '/trust-lifecycle/sensors' },
+          { label: 'Network scans', route: '/trust-lifecycle/network-scans' },
+          { label: 'Scripts', route: '/trust-lifecycle/scripts' },
         ],
       },
       {
         title: 'INTEGRATIONS',
         items: [
           { label: 'Connectors', route: '/trust-lifecycle/connectors' },
-          { label: 'Tools', route: '/trust-lifecycle/tools' },
+          { label: 'Client tools', route: '/trust-lifecycle/client-tools' },
         ],
       },
       {
         title: 'CONFIGURATION',
         items: [
           { label: 'Product settings', route: '/trust-lifecycle/product-settings' },
-          { label: 'Projects', route: '/trust-lifecycle/projects' },
-          { label: 'Teams', route: '/trust-lifecycle/teams' },
-          { label: 'User groups', route: '/trust-lifecycle/user-groups' },
+          { label: 'Business units', route: '/trust-lifecycle/business-units' },
+          { label: 'Seats', route: '/trust-lifecycle/seats' },
         ],
       },
     ],
@@ -208,27 +340,25 @@ export const productNavConfig: Record<string, ProductNav> = {
     ariaLabel: 'Private CA navigation',
     sections: [
       {
-        title: 'OVERVIEW',
+        title: 'MANAGE CAS',
         defaultExpanded: true,
-        items: [
-          { label: 'Dashboard', route: '/private-ca/dashboard' },
-          { label: 'Audit logs', route: '/private-ca/audit-logs' },
-        ],
-      },
-      {
-        title: 'MANAGE CA',
         items: [
           { label: 'Roots', route: '/private-ca/roots' },
           { label: 'Intermediates', route: '/private-ca/intermediates' },
-          { label: 'Hierarchy', route: '/private-ca/hierarchy' },
-          { label: 'End-entity certificates', route: '/private-ca/end-entity-certificates' },
+          { label: 'Certificate hierarchy', route: '/private-ca/certificate-hierarchy' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'End-entity certificates', route: '/private-ca/end-entity-certificates', numberBadge: 8 },
         ],
       },
       {
         title: 'POLICIES',
         items: [
-          { label: 'Certificate profiles', route: '/private-ca/certificate-profiles' },
           { label: 'Certificate templates', route: '/private-ca/certificate-templates' },
+          { label: 'Certificate profiles', route: '/private-ca/certificate-profiles' },
         ],
       },
       {
@@ -240,12 +370,19 @@ export const productNavConfig: Record<string, ProductNav> = {
         ],
       },
       {
-        title: 'HSM',
+        title: 'HSMS',
+        badge: true,
         items: [
           { label: 'Registered partitions', route: '/private-ca/registered-partitions' },
           { label: 'Master escrow keys', route: '/private-ca/master-escrow-keys' },
-          { label: 'Providers', route: '/private-ca/providers' },
-          { label: 'Remote proxy', route: '/private-ca/remote-proxy' },
+          { label: 'HSM providers', route: '/private-ca/hsm-providers' },
+          { label: 'Connectivity', route: '/private-ca/connectivity' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Audit logs', route: '/private-ca/audit-logs' },
         ],
       },
       {
@@ -272,78 +409,48 @@ export const productNavConfig: Record<string, ProductNav> = {
           { label: 'Alerts', route: '/software-trust/alerts' },
           { label: 'Reports', route: '/software-trust/reports' },
           { label: 'Audit logs', route: '/software-trust/audit-logs' },
+          { label: 'Signature logs', route: '/software-trust/signature-logs' },
         ],
       },
       {
-        title: 'CERTIFICATES',
+        title: 'RELEASE SECURITY',
+        badge: true,
         items: [
-          { label: 'Orders', route: '/software-trust/orders' },
-          { label: 'Requests', route: '/software-trust/requests' },
+          { label: 'Repositories', route: '/software-trust/repositories' },
+          { label: 'Github releases', route: '/software-trust/github-releases' },
+          { label: 'Threat scanning', route: '/software-trust/threat-scanning', badge: true },
+          { label: 'SBOM & CBOM insights', route: '/software-trust/sbom-cbom-insights' },
+        ],
+      },
+      {
+        title: 'SIGNING',
+        items: [
+          { label: 'Keypairs', route: '/software-trust/keypairs' },
+          { label: 'Key rotations', route: '/software-trust/key-rotations' },
+          { label: 'Keypair profiles', route: '/software-trust/keypair-profiles' },
+          { label: 'GPG Keypairs', route: '/software-trust/gpg-keypairs' },
           { label: 'Certificates', route: '/software-trust/certificates' },
-          { label: 'Domains', route: '/software-trust/domains' },
-          { label: 'Organizations', route: '/software-trust/organizations' },
-          { label: 'Certificate authority', route: '/software-trust/certificate-authority' },
-        ],
-      },
-      {
-        title: 'DISCOVERY',
-        items: [
-          { label: 'Discovery dashboard', route: '/software-trust/discovery-dashboard' },
-          { label: 'View results', route: '/software-trust/view-results' },
-          { label: 'Manage discovery', route: '/software-trust/manage-discovery' },
-        ],
-      },
-      {
-        title: 'AUTOMATION',
-        items: [
-          { label: 'Automate now!', route: '/software-trust/automate-now' },
-          { label: 'Manage automation', route: '/software-trust/manage-automation' },
-          { label: 'Manage profiles', route: '/software-trust/manage-profiles' },
-          { label: 'Automated IPs', route: '/software-trust/automated-ips' },
-          { label: 'Automation plus', route: '/software-trust/automation-plus' },
-        ],
-      },
-      {
-        title: 'SUBACCOUNTS',
-        items: [
-          { label: 'Subaccounts', route: '/software-trust/subaccounts' },
-          { label: 'Orders', route: '/software-trust/subaccounts-orders' },
+          { label: 'Certificate profiles', route: '/software-trust/certificate-profiles' },
+          { label: 'CertCentral orders', route: '/software-trust/certcentral-orders' },
+          { label: 'Signature controls', route: '/software-trust/signature-controls' },
         ],
       },
       {
         title: 'INTEGRATIONS',
         items: [
-          { label: 'API keys', route: '/software-trust/api-keys' },
-          { label: 'ACME directory URLs', route: '/software-trust/acme-directory-urls' },
-          { label: 'Webhooks', route: '/software-trust/webhooks' },
-          { label: 'Integrate with Ultra DNS', route: '/software-trust/ultra-dns' },
+          { label: 'Connectors', route: '/software-trust/connectors' },
+          { label: 'Client tools', route: '/software-trust/client-tools' },
         ],
       },
       {
-        title: 'TOOLS',
+        title: 'CONFIGURATIONS',
         items: [
-          { label: 'SSL installation tool', route: '/software-trust/ssl-installation-tool' },
-          { label: 'Certificate utility', route: '/software-trust/certificate-utility' },
-          { label: 'CSR generator', route: '/software-trust/csr-generator' },
-        ],
-      },
-      {
-        title: 'PRODUCT SETTINGS',
-        items: [
-          { label: 'Preferences', route: '/software-trust/preferences' },
           { label: 'Product settings', route: '/software-trust/product-settings' },
-          { label: 'Custom order fields', route: '/software-trust/custom-order-fields' },
-          { label: 'Security settings', route: '/software-trust/security-settings' },
-        ],
-      },
-      {
-        title: 'USER MANAGEMENT',
-        items: [
-          { label: 'Users', route: '/software-trust/users' },
-          { label: 'Service users', route: '/software-trust/service-users' },
-          { label: 'Divisions', route: '/software-trust/divisions' },
-          { label: 'Guest access', route: '/software-trust/guest-access' },
-          { label: 'User invitations', route: '/software-trust/user-invitations' },
+          { label: 'Trust anchor certificates', route: '/software-trust/trust-anchor-certificates' },
+          { label: 'Certificate templates', route: '/software-trust/certificate-templates' },
+          { label: 'Projects', route: '/software-trust/projects' },
+          { label: 'Teams', route: '/software-trust/teams' },
+          { label: 'User groups', route: '/software-trust/user-groups' },
         ],
       },
     ],
@@ -351,10 +458,56 @@ export const productNavConfig: Record<string, ProductNav> = {
 
   dns: {
     id: 'dns',
-    label: 'DNS',
+    label: 'DigiCert DNS',
     route: '/dns',
-    ariaLabel: 'DNS Trust navigation',
-    sections: stubNav('dns'),
+    ariaLabel: 'DigiCert DNS navigation',
+    sections: [
+      {
+        title: 'OVERVIEW',
+        defaultExpanded: true,
+        items: [
+          { label: 'Dashboard', route: '/dns/dashboard' },
+          { label: 'Alerts', route: '/dns/alerts' },
+          { label: 'Reports', route: '/dns/reports' },
+          { label: 'Analytics', route: '/dns/analytics' },
+          { label: 'Audit logs', route: '/dns/audit-logs' },
+        ],
+      },
+      {
+        title: 'DNS',
+        items: [
+          { label: 'Zones', route: '/dns/zones' },
+          { label: 'Web forwards', route: '/dns/web-forwards' },
+          { label: 'Multi-CDN', route: '/dns/multi-cdn' },
+          { label: 'Traffic management', route: '/dns/traffic-management' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Monitoring', route: '/dns/monitoring' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Integrations', route: '/dns/integrations' },
+        ],
+      },
+      {
+        title: 'CONFIGURATION',
+        items: [
+          { label: 'Product settings', route: '/dns/product-settings' },
+          { label: 'Access management', route: '/dns/access-management' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Tasks', route: '/dns/tasks' },
+        ],
+      },
+    ],
   },
 
   'content-trust': {
@@ -362,7 +515,41 @@ export const productNavConfig: Record<string, ProductNav> = {
     label: 'Content Trust',
     route: '/content-trust',
     ariaLabel: 'Content Trust navigation',
-    sections: stubNav('content-trust'),
+    sections: [
+      {
+        title: 'OVERVIEW',
+        defaultExpanded: true,
+        items: [
+          { label: 'Dashboard', route: '/content-trust/dashboard' },
+          { label: 'Reports', route: '/content-trust/reports' },
+          { label: 'Audit logs', route: '/content-trust/audit-logs' },
+        ],
+      },
+      {
+        title: 'MEDIA',
+        items: [
+          { label: 'Signing', route: '/content-trust/media-signing' },
+          { label: 'Verification', route: '/content-trust/verification' },
+          { label: 'User certificates', route: '/content-trust/user-certificates' },
+        ],
+      },
+      {
+        title: 'DOCUMENT',
+        items: [
+          { label: 'Signing', route: '/content-trust/document-signing' },
+          { label: 'Signup links', route: '/content-trust/signup-links' },
+          { label: 'All credentials', route: '/content-trust/all-credentials' },
+          { label: 'User credentials', route: '/content-trust/user-credentials' },
+          { label: 'Bulk credentials', route: '/content-trust/bulk-credentials' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Client tools', route: '/content-trust/client-tools' },
+        ],
+      },
+    ],
   },
 
   'device-trust': {
@@ -370,24 +557,83 @@ export const productNavConfig: Record<string, ProductNav> = {
     label: 'Device Trust',
     route: '/device-trust',
     ariaLabel: 'Device Trust navigation',
-    sections: stubNav('device-trust'),
+    sections: [
+      {
+        title: 'OVERVIEW',
+        defaultExpanded: true,
+        items: [
+          { label: 'Dashboard', route: '/device-trust/dashboard' },
+          { label: 'Alerts', route: '/device-trust/alerts' },
+          { label: 'Reports', route: '/device-trust/reports' },
+          { label: 'Audit logs', route: '/device-trust/audit-logs' },
+        ],
+      },
+      {
+        title: 'DEVICE MANAGEMENT',
+        items: [
+          { label: 'Devices', route: '/device-trust/devices' },
+          { label: 'Device group', route: '/device-trust/device-group' },
+          { label: 'Cloud platform policies', route: '/device-trust/cloud-platform-policies' },
+        ],
+      },
+      {
+        title: 'CERTIFICATE MANAGEMENT',
+        items: [
+          { label: 'Certificates', route: '/device-trust/certificates' },
+          { label: 'Certificate settings', route: '/device-trust/certificate-settings' },
+          { label: 'Issuing CAs', route: '/device-trust/issuing-cas' },
+          { label: 'Trust bundle', route: '/device-trust/trust-bundle' },
+          { label: 'Registered values', route: '/device-trust/registered-values' },
+          { label: 'OSCP groups', route: '/device-trust/oscp-groups' },
+        ],
+      },
+      {
+        title: 'AUTHENTICATION MANAGEMENT',
+        items: [
+          { label: 'Authentication policies', route: '/device-trust/authentication-policies' },
+          { label: 'Authentication certificates', route: '/device-trust/authentication-certificates' },
+          { label: 'ACME credentials', route: '/device-trust/acme-credentials' },
+          { label: 'Passcodes', route: '/device-trust/passcodes' },
+          { label: 'Authentication CAs', route: '/device-trust/authentication-cas' },
+        ],
+      },
+      {
+        title: 'SOFTWARE UPDATES',
+        items: [
+          { label: 'Artifacts', route: '/device-trust/artifacts' },
+          { label: 'Releases', route: '/device-trust/releases' },
+          { label: 'Deployments', route: '/device-trust/deployments' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Jobs', route: '/device-trust/jobs' },
+        ],
+      },
+      {
+        title: 'INTEGRATIONS',
+        items: [
+          { label: 'Connectors', route: '/device-trust/connectors' },
+          { label: 'Digicert Gateways', route: '/device-trust/digicert-gateways' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Divisions', route: '/device-trust/divisions' },
+        ],
+      },
+      {
+        title: '',
+        items: [
+          { label: 'Blueprints', route: '/device-trust/blueprints' },
+        ],
+      },
+    ],
   },
 
-  'ai-agents': {
-    id: 'ai-agents',
-    label: 'AI Agents',
-    route: '/ai-agents',
-    ariaLabel: 'AI Agents navigation',
-    sections: stubNav('ai-agents'),
-  },
-
-  valimail: {
-    id: 'valimail',
-    label: 'Valimail',
-    route: '/valimail',
-    ariaLabel: 'Valimail navigation',
-    sections: stubNav('valimail'),
-  },
+  /* ai-agents and valimail are "explore" products — see exploreProducts above; they render an ExplorePage, not a spoke nav. */
 
   'settings-users': {
     id: 'settings-users',
@@ -520,3 +766,46 @@ export const productNavConfig: Record<string, ProductNav> = {
     ],
   },
 };
+
+/**
+ * Returns the route to navigate to when a product icon is clicked.
+ * For products with a spoke nav, returns the first item's route. For
+ * explore products (no nav config), falls back to the product root.
+ */
+export function getProductLandingRoute(productId: string): string {
+  const nav = productNavConfig[productId];
+  if (!nav) return `/${productId}`;
+  const firstItem = nav.sections[0]?.items[0];
+  return firstItem?.route ?? nav.route;
+}
+
+export interface Crumb {
+  label: string;
+  route?: string;
+}
+
+/**
+ * Walks productNavConfig to find the product + item that matches a pathname.
+ * Used to drive page titles and breadcrumbs from the same source as the nav.
+ */
+export function findItemByRoute(
+  pathname: string,
+): { product: ProductNav; item: NavItem } | null {
+  for (const product of Object.values(productNavConfig)) {
+    for (const section of product.sections) {
+      for (const item of section.items) {
+        if (item.route === pathname) return { product, item };
+      }
+    }
+  }
+  return null;
+}
+
+export function getBreadcrumbs(pathname: string): Crumb[] {
+  const match = findItemByRoute(pathname);
+  if (!match) return [];
+  return [
+    { label: match.product.label, route: getProductLandingRoute(match.product.id) },
+    { label: match.item.label },
+  ];
+}
