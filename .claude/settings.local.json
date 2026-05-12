@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/leann.manning/.nvm/versions/**)"
+    ]
+  }
+}
