@@ -90,19 +90,21 @@ const NavItem = styled(NavLink)`
   border-radius: 4px;
   transition: background 0.12s, color 0.12s;
 
-  &:hover {
-    background: #F0F3F5;
+  /* Hover only applies to inactive items — hovering the current page
+     shouldn't fall back to the (lighter) hover tone. */
+  &:not(.active):not([aria-current='page']):hover {
+    background: #ECEFF2;
   }
 
   &.active,
   &[aria-current='page'] {
-    background: #F0F3F5;
+    background: #DEE3E8;
     color: #44484A;
     font-weight: 500;
   }
 
   &:active {
-    background: #E7EBEF;
+    background: #CFD6DC;
     color: #353535;
   }
 

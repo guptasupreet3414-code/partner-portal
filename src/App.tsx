@@ -5,6 +5,7 @@ import { TopNav } from './components/TopNav/TopNav';
 import { LeftNav } from './components/LeftNav/LeftNav';
 import { StubPage } from './pages/StubPage';
 import { ExplorePage } from './pages/ExplorePage';
+import { PlanPage } from './pages/PlanPage';
 import { useNavState } from './hooks/useNavState';
 import { useBreakpoint, getNavMode } from './hooks/useBreakpoint';
 import { exploreProductIds, productNavConfig } from './data/navConfig';
@@ -118,6 +119,7 @@ const allRoutes = [
   '/certcentral/business-units',
   '/certcentral/seats',
   '/trust-lifecycle',
+  '/trust-lifecycle/plan',
   '/trust-lifecycle/dashboard',
   '/trust-lifecycle/alerts',
   '/trust-lifecycle/reports',
@@ -263,7 +265,7 @@ export const App: React.FC = () => {
   // Explore products have no spoke — content fills the area right of the icon rail.
   const hasSpoke = Boolean(productNavConfig[activeProductId]);
   const leftOffset = isSpokeOpen && hasSpoke ? '276px' : '72px';
-  const rightOffset = activeTopNav === 'ai-assist' ? '400px' : '0px';
+  const rightOffset = '0px';
 
   return (
     <AppShell>
@@ -298,10 +300,11 @@ export const App: React.FC = () => {
       >
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/trust-lifecycle/plan" element={<PlanPage />} />
           {[...exploreProductIds].map(id => (
             <Route key={id} path={`/${id}`} element={<ExplorePage productId={id} />} />
           ))}
-          {allRoutes.filter(r => r !== '/' && ![...exploreProductIds].some(id => r === `/${id}` || r.startsWith(`/${id}/`))).map(route => (
+          {allRoutes.filter(r => r !== '/' && r !== '/trust-lifecycle/plan' && ![...exploreProductIds].some(id => r === `/${id}` || r.startsWith(`/${id}/`))).map(route => (
             <Route key={route} path={route} element={<StubPage />} />
           ))}
           <Route path="*" element={<StubPage />} />

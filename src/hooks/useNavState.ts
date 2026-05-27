@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export type ActiveTopNav = 'cart' | 'settings' | 'help' | 'profile' | 'ai-assist' | null;
+export type ActiveTopNav = 'cart' | 'settings' | 'help' | 'profile' | null;
 
 interface NavState {
   activeProductId: string;

@@ -19,7 +19,94 @@ export const DropdownMenu = styled.div`
 `;
 
 export const DropdownMenuWide = styled(DropdownMenu)`
-  width: 240px;
+  width: 320px;
+`;
+
+/* ─── Environments section ─────────────────────────────────────────────── */
+
+export const EnvironmentsSection = styled.div`
+  padding: 8px 8px 12px;
+`;
+
+export const EnvironmentsLabel = styled.div`
+  padding: 4px 8px 8px;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.neutral700};
+`;
+
+export const EnvironmentRow = styled.button<{ $current: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  background: ${({ $current }) => ($current ? '#ECEFF2' : 'transparent')};
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:hover {
+    background: ${({ $current }) => ($current ? '#ECEFF2' : '#F3F5F5')};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: -2px;
+  }
+`;
+
+export const EnvironmentAvatar = styled.span`
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #143E6B;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px;
+  font-weight: 600;
+`;
+
+export const EnvironmentText = styled.span`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+export const EnvironmentName = styled.span`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.neutral900};
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+export const EnvironmentSubtitle = styled.span`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.neutral700};
+  line-height: 1.3;
+`;
+
+export const EnvironmentAction = styled.span<{ $primary?: boolean }>`
+  flex-shrink: 0;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px;
+  font-weight: 400;
+  color: ${({ $primary, theme }) => ($primary ? theme.colors.blue300 : theme.colors.neutral600)};
+  padding: 0 4px;
 `;
 
 export const DropdownSection = styled.div`
@@ -63,28 +150,11 @@ export const DropdownUserEmail = styled.div`
 `;
 
 export const DropdownOrgEnv = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: 13px;
-  color: ${({ theme }) => theme.colors.neutral900};
-
-  & > span:first-child {
-    font-weight: 500;
-  }
-
-  & > span:nth-child(2) {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 10px;
-    background: #E2EEFF;
-    color: #0048AC;
-    font-size: 12px;
-    font-weight: 500;
-  }
+  color: ${({ theme }) => theme.colors.neutral700};
+  margin-top: 2px;
+  word-break: break-word;
 `;
 
 export const DropdownDivider = styled.hr`

@@ -23,7 +23,7 @@ describe('TopNav', () => {
 
     it('renders the DigiCert ONE logo with an accessible label', () => {
       renderWithProviders(<TopNav {...defaultProps} />);
-      expect(screen.getByLabelText('DigiCert ONE')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'DigiCert ONE' })).toBeInTheDocument();
     });
   });
 
@@ -133,25 +133,6 @@ describe('TopNav', () => {
       renderWithProviders(<TopNav {...defaultProps} onOpenTopNav={onOpen} />);
       fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
       expect(onOpen).toHaveBeenCalledWith('settings');
-    });
-  });
-
-  describe('AI Assist button', () => {
-    it('has an accessible label', () => {
-      renderWithProviders(<TopNav {...defaultProps} />);
-      expect(screen.getByRole('button', { name: 'Open AI Assist' })).toBeInTheDocument();
-    });
-
-    it('has aria-expanded="false" when AI panel is closed', () => {
-      renderWithProviders(<TopNav {...defaultProps} activeTopNav={null} />);
-      expect(screen.getByRole('button', { name: 'Open AI Assist' }))
-        .toHaveAttribute('aria-expanded', 'false');
-    });
-
-    it('has aria-expanded="true" when AI panel is open', () => {
-      renderWithProviders(<TopNav {...defaultProps} activeTopNav="ai-assist" />);
-      expect(screen.getByRole('button', { name: 'Open AI Assist' }))
-        .toHaveAttribute('aria-expanded', 'true');
     });
   });
 

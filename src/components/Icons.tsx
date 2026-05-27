@@ -149,21 +149,3 @@ export const IconClose: React.FC<IconProps> = ({ size = 16, color = 'currentColo
     <path d="M2 2l12 12M14 2L2 14" stroke={color} strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
-
-export function getProductIcon(iconType: string, size = 20, color = 'white'): React.ReactElement {
-  const props = { size, color };
-  switch (iconType) {
-    case 'dashboard': return <IconDashboard {...props} />;
-    case 'settings': return <IconSettings {...props} />;
-    case 'shield': return <IconShield {...props} />;
-    case 'hierarchy': return <IconHierarchy {...props} />;
-    case 'cycle': return <IconCycle {...props} />;
-    case 'code': return <IconCode {...props} />;
-    case 'globe': return <IconGlobe {...props} />;
-    case 'document': return <IconDocument {...props} />;
-    case 'mobile': return <IconMobile {...props} />;
-    case 'sparkle': return <IconSparkle {...props} />;
-    case 'envelope': return <IconEnvelope {...props} />;
-    default: return <IconDashboard {...props} />;
-  }
-}

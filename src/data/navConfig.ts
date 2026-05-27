@@ -30,13 +30,116 @@ export interface NavSection {
   badge?: boolean;
 }
 
+export interface ProductPlan {
+  /** Tier name shown in the spoke header, e.g. "Essentials" */
+  tier: string;
+  /** Route to the plan / subscription page */
+  route: string;
+}
+
+export interface ProductInstanceConfig {
+  /** ID of the instance shown by default in the spoke header */
+  defaultId: string;
+  /** IDs of instances connected by default (visible in the switcher list). Any instances not in this list are surfaced in the "Add a connected instance" dropdown. */
+  defaultConnectedIds: string[];
+}
+
 export interface ProductNav {
   id: string;
   label: string;
   route: string;
   ariaLabel: string;
   sections: NavSection[];
+  /** Optional subscription tier surfaced under the product label in the spoke nav */
+  plan?: ProductPlan;
+  /** Optional current-instance indicator surfaced under the product label; opens a switcher modal */
+  instance?: ProductInstanceConfig;
 }
+
+export interface InstanceAccountManager {
+  name: string;
+  email: string;
+}
+
+export interface CertCentralInstance {
+  id: string;
+  /** Short display name, e.g. "ACME Corp — Official" */
+  name: string;
+  /** Two- or three-letter region code, e.g. "US", "EU" */
+  region: string;
+  /** The signed-in user's role on this instance */
+  role: string;
+  /** Numeric account ID surfaced in the hover popover */
+  accountId: string;
+  /** Long-form region, e.g. "United States" */
+  regionFull: string;
+  /** Subscription tier on this instance, e.g. "Enterprise" */
+  tier: string;
+  accountManager: InstanceAccountManager;
+}
+
+export const certCentralInstances: CertCentralInstance[] = [
+  {
+    id: 'acme-official',
+    name: 'ACME Corp — Official',
+    region: 'US',
+    role: 'Finance manager',
+    accountId: '8345672',
+    regionFull: 'United States',
+    tier: 'Enterprise',
+    accountManager: { name: 'Jane Smith', email: 'jane.smith@acme.com' },
+  },
+  {
+    id: 'acme-it',
+    name: 'ACME Corp — IT',
+    region: 'US',
+    role: 'Manager',
+    accountId: '8345673',
+    regionFull: 'United States',
+    tier: 'Enterprise',
+    accountManager: { name: 'Jane Smith', email: 'jane.smith@acme.com' },
+  },
+  {
+    id: 'acme-dev',
+    name: 'ACME Corp — Dev',
+    region: 'EU',
+    role: 'Manager',
+    accountId: '8345674',
+    regionFull: 'European Union',
+    tier: 'Enterprise',
+    accountManager: { name: 'Jane Smith', email: 'jane.smith@acme.com' },
+  },
+  {
+    id: 'acme-sales',
+    name: 'ACME Corp — Sales',
+    region: 'US',
+    role: 'Manager',
+    accountId: '8345675',
+    regionFull: 'United States',
+    tier: 'Enterprise',
+    accountManager: { name: 'Jane Smith', email: 'jane.smith@acme.com' },
+  },
+  {
+    id: 'acme-staging',
+    name: 'ACME Corp — Staging',
+    region: 'EU',
+    role: 'Admin',
+    accountId: '8345677',
+    regionFull: 'European Union',
+    tier: 'Standard',
+    accountManager: { name: 'Jane Smith', email: 'jane.smith@acme.com' },
+  },
+  {
+    id: 'acme-marketing',
+    name: 'ACME Corp — Marketing',
+    region: 'EU',
+    role: 'Read-only',
+    accountId: '8345678',
+    regionFull: 'European Union',
+    tier: 'Standard',
+    accountManager: { name: 'Jane Smith', email: 'jane.smith@acme.com' },
+  },
+];
 
 export interface IconRailProduct {
   id: string;
@@ -119,17 +222,6 @@ export const exploreProducts: Record<string, ExploreProduct> = {
   },
 };
 
-const stubNav = (id: string): NavSection[] => [
-  {
-    title: 'OVERVIEW',
-    defaultExpanded: true,
-    items: [
-      { label: 'Dashboard', route: `/${id}/dashboard` },
-      { label: 'Settings', route: `/${id}/settings` },
-    ],
-  },
-];
-
 export const productNavConfig: Record<string, ProductNav> = {
   dashboard: {
     id: 'dashboard',
@@ -174,6 +266,10 @@ export const productNavConfig: Record<string, ProductNav> = {
     label: 'CertCentral',
     route: '/certcentral',
     ariaLabel: 'CertCentral navigation',
+    instance: {
+      defaultId: 'acme-official',
+      defaultConnectedIds: ['acme-official', 'acme-it', 'acme-dev'],
+    },
     sections: [
       {
         title: '',
@@ -280,6 +376,10 @@ export const productNavConfig: Record<string, ProductNav> = {
     label: 'Trust Lifecycle',
     route: '/trust-lifecycle',
     ariaLabel: 'Trust Lifecycle navigation',
+    plan: {
+      tier: 'Essentials',
+      route: '/trust-lifecycle/plan',
+    },
     sections: [
       {
         title: 'OVERVIEW',

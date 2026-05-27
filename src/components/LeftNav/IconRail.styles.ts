@@ -45,23 +45,26 @@ export const RailButton = styled.button<{ $active: boolean }>`
   justify-content: center;
   border: none;
   border-radius: 4px;
-  background: ${({ $active }) => ($active ? '#D6DCE1' : 'transparent')};
+  background: ${({ $active }) => ($active ? '#C1C8CD' : 'transparent')};
   color: ${({ $active }) => ($active ? '#44484A' : '#757D82')};
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 
   & > svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     display: block;
+    shape-rendering: geometricPrecision;
   }
 
+  /* Hover only applies to inactive buttons — hovering an already-selected
+     product shouldn't lighten it back to the hover tone. */
   &:hover {
-    background: #D6DCE1;
+    background: ${({ $active }) => ($active ? '#C1C8CD' : '#D6DCE1')};
   }
 
   &:active {
-    background: #C1C8CD;
+    background: #ADB4BA;
     color: #353535;
   }
 

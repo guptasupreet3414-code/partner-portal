@@ -17,7 +17,6 @@ import { SettingsDropdown } from './SettingsDropdown';
 import { HelpDropdown } from './HelpDropdown';
 import { ProfileDropdown } from './ProfileDropdown';
 import { CartPanel } from './CartPanel';
-import { AIAssistPanel } from './AIAssistPanel';
 import { TransparentBackdrop } from './TopNavDropdown.styles';
 import { IconHamburger } from '../Icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -137,8 +136,6 @@ export const TopNav: React.FC<TopNavProps> = ({
       {/* Cart — right-side overlay panel */}
       <CartPanel open={activeTopNav === 'cart'} onClose={onCloseTopNav} />
 
-      {/* AI Assist — right-side push panel (no backdrop) */}
-      <AIAssistPanel open={activeTopNav === 'ai-assist'} onClose={onCloseTopNav} />
     </>
   );
 };

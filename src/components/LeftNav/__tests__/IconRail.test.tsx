@@ -27,7 +27,7 @@ describe('IconRail', () => {
       renderWithProviders(
         <IconRail activeProductId="certcentral" onSelectProduct={vi.fn()} />
       );
-      expect(screen.getByRole('button', { name: 'Dashboard' }))
+      expect(screen.getByRole('button', { name: 'Overview' }))
         .not.toHaveAttribute('aria-current');
     });
 

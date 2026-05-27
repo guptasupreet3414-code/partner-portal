@@ -498,10 +498,7 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
                       <DropdownUserName>Deepika Chauhan</DropdownUserName>
                       <DropdownUserMeta>dchauhan</DropdownUserMeta>
                       <DropdownUserEmail>d.chauhan@example.com</DropdownUserEmail>
-                      <DropdownOrgEnv>
-                        <span>Acme Corp</span>
-                        <span>Production</span>
-                      </DropdownOrgEnv>
+                      <DropdownOrgEnv>Acme Corp</DropdownOrgEnv>
                     </DropdownUserInfo>
                     <nav aria-label="Profile menu">
                       {profileItems.map(item => (

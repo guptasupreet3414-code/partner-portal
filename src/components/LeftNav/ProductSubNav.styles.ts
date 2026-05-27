@@ -33,7 +33,8 @@ export const SubNavClip = styled.div`
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background: #E8EAED;
+  /* Matches the icon-rail container colour — the spoke header reads as a continuation of the same "products hub" surface */
+  background: #E7EBEF;
   border-right: 1px solid ${({ theme }) => theme.colors.neutral300};
 `;
 
@@ -57,11 +58,70 @@ export const SubNavInner = styled.div<{ $open: boolean }>`
 
 export const SubNavHeader = styled.div`
   display: flex;
-  align-items: center;
-  height: ${({ theme }) => theme.layout.topNavHeight};
-  padding: 0 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px 16px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral300};
   flex-shrink: 0;
+`;
+
+export const PlanTierLabel = styled.span`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  font-weight: 500;
+  color: #757D82;
+  line-height: 1.2;
+  transition: color 0.15s ease;
+`;
+
+/*
+ * Clickable variant — used for products whose header itself opens a page (e.g.
+ * Trust Lifecycle plan). The spoke header shares its surface colour with the
+ * icon rail (both #E7EBEF), so the state backgrounds match the rail button
+ * exactly. PlanTierLabel colour mirrors the rail icon-colour pattern too:
+ * unchanged on hover, darker when selected, darkest while pressed.
+ */
+export const SubNavHeaderButton = styled.button<{ $active: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral300};
+  background: ${({ $active }) => ($active ? '#C1C8CD' : 'transparent')};
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+
+  ${({ $active }) =>
+    $active &&
+    `
+    ${PlanTierLabel} {
+      color: #44484A;
+    }
+  `}
+
+  &:hover {
+    background: ${({ $active }) => ($active ? '#C1C8CD' : '#D6DCE1')};
+  }
+
+  &:active {
+    background: #ADB4BA;
+
+    ${PlanTierLabel} {
+      color: #353535;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #1976D2;
+    outline-offset: -2px;
+  }
 `;
 
 export const SubNavTitle = styled.h2`
@@ -71,6 +131,65 @@ export const SubNavTitle = styled.h2`
   color: ${({ theme }) => theme.colors.neutral900};
   margin: 0;
 `;
+
+/*
+ * Instance picker — ghost button: borderless, transparent, color-only hover.
+ * Right padding is set so the chevron aligns with section accordion chevrons
+ * (section wrapper margin 8px + section header padding-right 12px = 20px
+ * inset from the spoke's right edge; here, header padding-right is 16px so
+ * the picker absorbs the remaining 4px).
+ */
+export const InstancePicker = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 24px;
+  padding: 2px 4px 2px 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  font-weight: 500;
+  color: #757D82;
+  text-align: left;
+  transition: color 0.12s;
+
+  &:hover {
+    color: #353535;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: 2px;
+  }
+`;
+
+export const InstancePickerLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+`;
+
+export const InstancePickerRegion = styled.span`
+  margin-left: 4px;
+  color: inherit;
+`;
+
+export const InstancePickerChevron = styled.span`
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  font-size: 12px;
+`;
+
 
 export const SubNavScrollArea = styled.div`
   flex: 1;
