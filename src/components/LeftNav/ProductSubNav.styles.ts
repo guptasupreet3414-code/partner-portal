@@ -66,61 +66,53 @@ export const SubNavHeader = styled.div`
   flex-shrink: 0;
 `;
 
-export const PlanTierLabel = styled.span`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px;
-  font-weight: 500;
-  color: #757D82;
-  line-height: 1.2;
-  transition: color 0.15s ease;
-`;
-
 /*
- * Clickable variant — used for products whose header itself opens a page (e.g.
- * Trust Lifecycle plan). The spoke header shares its surface colour with the
- * icon rail (both #E7EBEF), so the state backgrounds match the rail button
- * exactly. PlanTierLabel colour mirrors the rail icon-colour pattern too:
- * unchanged on hover, darker when selected, darkest while pressed.
+ * Plan tier pill — small clickable chip rendered under the product title for
+ * products that carry a subscription plan (e.g. Trust Lifecycle). Soft blue
+ * tint + arrow telegraphs "this navigates to the plan page" without competing
+ * with the product title for attention.
  */
-export const SubNavHeaderButton = styled.button<{ $active: boolean }>`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  width: 100%;
-  padding: 12px 16px;
-  border: none;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral300};
-  background: ${({ $active }) => ($active ? '#C1C8CD' : 'transparent')};
+export const PlanTierPill = styled.button<{ $active: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  height: 22px;
+  padding: 0 10px;
+  border: 1px solid ${({ $active }) => ($active ? '#8FBEFF' : '#B3D4FF')};
+  border-radius: 11px;
+  background: ${({ $active }) => ($active ? '#D2E4FF' : '#E2EEFF')};
   cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  flex-shrink: 0;
-  transition: background 0.15s ease;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: #0048AC;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 
-  ${({ $active }) =>
-    $active &&
-    `
-    ${PlanTierLabel} {
-      color: #44484A;
-    }
-  `}
+  & > svg {
+    font-size: 10px;
+    transition: transform 0.15s ease;
+  }
 
   &:hover {
-    background: ${({ $active }) => ($active ? '#C1C8CD' : '#D6DCE1')};
+    background: #D2E4FF;
+    border-color: #8FBEFF;
+
+    & > svg {
+      transform: translateX(2px);
+    }
   }
 
   &:active {
-    background: #ADB4BA;
-
-    ${PlanTierLabel} {
-      color: #353535;
-    }
+    background: #B3D4FF;
+    border-color: #6FA8FF;
+    color: #003E6B;
   }
 
   &:focus-visible {
-    outline: 2px solid #1976D2;
-    outline-offset: -2px;
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: 2px;
   }
 `;
 

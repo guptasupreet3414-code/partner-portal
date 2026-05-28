@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import {
   SubNavWrapper,
   SubNavClip,
   SubNavInner,
   SubNavHeader,
-  SubNavHeaderButton,
   SubNavTitle,
   SubNavScrollArea,
   ChevronWrapper,
@@ -18,7 +17,7 @@ import {
   InstancePickerLabel,
   InstancePickerRegion,
   InstancePickerChevron,
-  PlanTierLabel,
+  PlanTierPill,
 } from './ProductSubNav.styles';
 import { NavSection } from './NavSection';
 import { productNavConfig } from '../../data/navConfig';
@@ -70,40 +69,40 @@ export const ProductSubNav: React.FC<ProductSubNavProps> = ({
           <SubNavInner $open={isSpokeOpen}>
             {productNav && (
               <>
-                {productNav.plan ? (
-                  <SubNavHeaderButton
-                    type="button"
-                    $active={location.pathname === productNav.plan.route}
-                    aria-current={location.pathname === productNav.plan.route ? 'page' : undefined}
-                    onClick={() => navigate(productNav.plan!.route)}
-                    aria-label={`${productNav.label}. Current plan: ${productNav.plan.tier}. View plans and upgrade options.`}
-                  >
-                    <SubNavTitle>{productNav.label}</SubNavTitle>
-                    <PlanTierLabel>{productNav.plan.tier} plan</PlanTierLabel>
-                  </SubNavHeaderButton>
-                ) : (
-                  <SubNavHeader>
-                    <SubNavTitle>{productNav.label}</SubNavTitle>
+                <SubNavHeader>
+                  <SubNavTitle>{productNav.label}</SubNavTitle>
 
-                    {productNav.instance && (
-                      <InstancePicker
-                        type="button"
-                        onClick={() => setInstanceModalOpen(true)}
-                        aria-haspopup="dialog"
-                        aria-expanded={instanceModalOpen}
-                        aria-label={`Current instance: ${certCentralInstance.current.name} (${certCentralInstance.current.region}). Switch instance.`}
-                      >
-                        <InstancePickerLabel>
-                          {certCentralInstance.current.name}
-                          <InstancePickerRegion>({certCentralInstance.current.region})</InstancePickerRegion>
-                        </InstancePickerLabel>
-                        <InstancePickerChevron aria-hidden="true">
-                          <FontAwesomeIcon icon={faChevronRight} />
-                        </InstancePickerChevron>
-                      </InstancePicker>
-                    )}
-                  </SubNavHeader>
-                )}
+                  {productNav.plan && (
+                    <PlanTierPill
+                      type="button"
+                      $active={location.pathname === productNav.plan.route}
+                      aria-current={location.pathname === productNav.plan.route ? 'page' : undefined}
+                      onClick={() => navigate(productNav.plan!.route)}
+                      aria-label={`Current plan: ${productNav.plan.tier}. View plans and upgrade options.`}
+                    >
+                      {productNav.plan.tier} plan
+                      <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
+                    </PlanTierPill>
+                  )}
+
+                  {productNav.instance && (
+                    <InstancePicker
+                      type="button"
+                      onClick={() => setInstanceModalOpen(true)}
+                      aria-haspopup="dialog"
+                      aria-expanded={instanceModalOpen}
+                      aria-label={`Current instance: ${certCentralInstance.current.name} (${certCentralInstance.current.region}). Switch instance.`}
+                    >
+                      <InstancePickerLabel>
+                        {certCentralInstance.current.name}
+                        <InstancePickerRegion>({certCentralInstance.current.region})</InstancePickerRegion>
+                      </InstancePickerLabel>
+                      <InstancePickerChevron aria-hidden="true">
+                        <FontAwesomeIcon icon={faChevronRight} />
+                      </InstancePickerChevron>
+                    </InstancePicker>
+                  )}
+                </SubNavHeader>
                 <SubNavScrollArea>
                   <nav aria-label="Product navigation">
                     {productNav.sections.map((section, i) => (

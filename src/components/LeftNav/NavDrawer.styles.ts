@@ -179,11 +179,11 @@ export const DrawerFooterButton = styled.button`
   transition: background 0.12s, color 0.12s;
 
   &:hover {
-    background: #F0F3F5;
+    background: #ECEFF2;
   }
 
   &:active {
-    background: #E7EBEF;
+    background: #CFD6DC;
     color: #353535;
   }
 
@@ -226,6 +226,108 @@ export const DrawerFooterAvatar = styled.span`
   font-weight: 700;
 `;
 
+/* ─── Mobile L2 product context (plan / instance) ───────────────────────── */
+
+/* Container surfaced above the sub-nav sections when drilled into a product
+   that carries a subscription plan or an instance picker. */
+export const MobileProductMetaSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+`;
+
+/* Touch-friendly version of the desktop PlanTierPill — same visual language
+   (blue tint + trailing arrow) but a 32px tap target. */
+export const MobilePlanTierPill = styled.button<{ $active: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid ${({ $active }) => ($active ? '#8FBEFF' : '#B3D4FF')};
+  border-radius: 16px;
+  background: ${({ $active }) => ($active ? '#D2E4FF' : '#E2EEFF')};
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  font-weight: 500;
+  color: #0048AC;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+  & > svg {
+    font-size: 11px;
+  }
+
+  &:active {
+    background: #B3D4FF;
+    border-color: #6FA8FF;
+    color: #003E6B;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: 2px;
+  }
+`;
+
+/* Mobile instance picker — mirrors the desktop ghost-button styling (transparent,
+   color-on-hover, trailing chevron) so the visual language is identical across
+   breakpoints. Only the tap target is enlarged for touch. */
+export const MobileInstancePicker = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 4px 4px 4px 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 14px;
+  font-weight: 500;
+  color: #757D82;
+  text-align: left;
+  transition: color 0.12s;
+
+  &:active {
+    color: #353535;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: 2px;
+  }
+`;
+
+export const MobileInstancePickerLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+`;
+
+export const MobileInstancePickerRegion = styled.span`
+  margin-left: 4px;
+  color: inherit;
+`;
+
+export const MobileInstancePickerChevron = styled.span`
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  font-size: 12px;
+`;
+
 /* Section label in Level 2 sub-nav */
 export const DrawerSubSectionLabel = styled.div`
   padding: 10px 16px 4px;
@@ -237,7 +339,7 @@ export const DrawerSubSectionLabel = styled.div`
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
-/* Individual sub-nav link in Level 2 — matches desktop menu item spec */
+/* Individual sub-nav link in Level 2 — matches the desktop spoke (NavItem) state ladder */
 export const DrawerSubNavLink = styled(NavLink)<{ $active: boolean }>`
   text-decoration: none;
   display: flex;
@@ -249,7 +351,7 @@ export const DrawerSubNavLink = styled(NavLink)<{ $active: boolean }>`
   padding: 0 12px;
   border: none;
   border-radius: 4px;
-  background: ${({ $active }) => ($active ? '#F0F3F5' : 'transparent')};
+  background: ${({ $active }) => ($active ? '#DEE3E8' : 'transparent')};
   cursor: pointer;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: 14px;
@@ -259,11 +361,11 @@ export const DrawerSubNavLink = styled(NavLink)<{ $active: boolean }>`
   transition: background 0.12s, color 0.12s;
 
   &:hover {
-    background: #F0F3F5;
+    background: ${({ $active }) => ($active ? '#DEE3E8' : '#ECEFF2')};
   }
 
   &:active {
-    background: #E7EBEF;
+    background: #CFD6DC;
     color: #353535;
   }
 
@@ -353,6 +455,7 @@ export const DrawerDivider = styled.hr`
   margin: 8px 12px;
 `;
 
+/* Desktop drawer fallback product row — unchanged from the original spec. */
 export const DrawerProductRow = styled.button<{ $active: boolean }>`
   display: flex;
   align-items: center;
@@ -380,6 +483,45 @@ export const DrawerProductRow = styled.button<{ $active: boolean }>`
 
   &:active {
     background: #E7EBEF;
+    color: #353535;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: -2px;
+  }
+`;
+
+/* Mobile L1 product row — uses the same spoke ladder as DrawerSubNavLink because
+   both panes share the #F9FAFB surface on mobile, so hub and spoke read as one
+   continuous nav surface (unlike desktop where the rail sits on #E7EBEF). */
+export const MobileProductRow = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 16px);
+  height: 40px;
+  margin: 0 8px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 4px;
+  background: ${({ $active }) => ($active ? '#DEE3E8' : 'transparent')};
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 14px;
+  font-weight: ${({ $active }) => ($active ? '500' : '400')};
+  color: ${({ $active }) => ($active ? '#44484A' : '#636A6E')};
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+  overflow: hidden;
+
+  &:hover {
+    background: ${({ $active }) => ($active ? '#DEE3E8' : '#ECEFF2')};
+  }
+
+  &:active {
+    background: #CFD6DC;
     color: #353535;
   }
 

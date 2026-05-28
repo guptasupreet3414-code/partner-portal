@@ -15,12 +15,19 @@ import {
   DrawerGroup,
   DrawerDivider,
   DrawerProductRow,
+  MobileProductRow,
   DrawerProductLabel,
   DrawerFooter,
   DrawerFooterButton,
   DrawerFooterIcon,
   DrawerFooterLabel,
   DrawerFooterAvatar,
+  MobileProductMetaSection,
+  MobilePlanTierPill,
+  MobileInstancePicker,
+  MobileInstancePickerLabel,
+  MobileInstancePickerRegion,
+  MobileInstancePickerChevron,
 } from './NavDrawer.styles';
 import {
   DropdownUserInfo,
@@ -31,7 +38,7 @@ import {
 } from '../TopNav/TopNavDropdown.styles';
 import { IconClose, IconChevronLeft } from '../Icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear, faCircleQuestion, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faCircleQuestion, faChevronRight, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import {
   iconRailGroup1,
   iconRailGroup2,
@@ -39,6 +46,8 @@ import {
   getProductLandingRoute,
   type IconRailProduct,
 } from '../../data/navConfig';
+import { useCertCentralInstance } from '../../hooks/useCertCentralInstance';
+import { SwitchInstanceModal } from '../SwitchInstanceModal/SwitchInstanceModal';
 
 interface NavDrawerProps {
   open: boolean;
@@ -137,7 +146,7 @@ const MobileL1Item: React.FC<{
 
   return (
     <div>
-      <DrawerProductRow
+      <MobileProductRow
         $active={isActive}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -147,18 +156,18 @@ const MobileL1Item: React.FC<{
         <product.Icon
           aria-hidden="true"
           focusable="false"
-          width={18}
-          height={18}
-          color={isActive ? '#44484A' : '#6B7280'}
+          width={22}
+          height={22}
+          color="currentColor"
         />
         <DrawerProductLabel>{product.label}</DrawerProductLabel>
         {hasSubNav && (
           <FontAwesomeIcon
             icon={faChevronRight}
-            style={{ fontSize: 12, color: isActive ? '#44484A' : '#9CA3AF', flexShrink: 0 }}
+            style={{ fontSize: 12, color: 'currentColor', flexShrink: 0 }}
           />
         )}
-      </DrawerProductRow>
+      </MobileProductRow>
     </div>
   );
 };
@@ -173,6 +182,7 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
   isMobile,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const panelRef   = useRef<HTMLDivElement>(null);
   const l2PaneRef  = useRef<HTMLDivElement>(null);
   const drillSrcRef = useRef<HTMLButtonElement | null>(null);
@@ -182,6 +192,8 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
   const [level, setLevel] = useState<'l1' | 'l2'>('l1');
   const [drillProductId, setDrillProductId] = useState<string | null>(null);
   const [drillFooter, setDrillFooter] = useState<FooterKey | null>(null);
+  const [instanceModalOpen, setInstanceModalOpen] = useState(false);
+  const certCentralInstance = useCertCentralInstance();
 
   // Always return to L1 when the drawer is closed
   useEffect(() => {
@@ -435,6 +447,42 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
               </DrawerPaneHeader>
 
               <DrawerPaneScroll>
+                {drillProductNav && (drillProductNav.plan || drillProductNav.instance) && (
+                  <MobileProductMetaSection>
+                    {drillProductNav.plan && (
+                      <MobilePlanTierPill
+                        type="button"
+                        $active={location.pathname === drillProductNav.plan.route}
+                        aria-current={location.pathname === drillProductNav.plan.route ? 'page' : undefined}
+                        onClick={() => {
+                          navigate(drillProductNav.plan!.route);
+                          onSelectProduct(drillProductId!);
+                        }}
+                        aria-label={`Current plan: ${drillProductNav.plan.tier}. View plans and upgrade options.`}
+                      >
+                        {drillProductNav.plan.tier} plan
+                        <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
+                      </MobilePlanTierPill>
+                    )}
+                    {drillProductNav.instance && (
+                      <MobileInstancePicker
+                        type="button"
+                        onClick={() => setInstanceModalOpen(true)}
+                        aria-haspopup="dialog"
+                        aria-expanded={instanceModalOpen}
+                        aria-label={`Current instance: ${certCentralInstance.current.name} (${certCentralInstance.current.region}). Switch instance.`}
+                      >
+                        <MobileInstancePickerLabel>
+                          {certCentralInstance.current.name}
+                          <MobileInstancePickerRegion>({certCentralInstance.current.region})</MobileInstancePickerRegion>
+                        </MobileInstancePickerLabel>
+                        <MobileInstancePickerChevron aria-hidden="true">
+                          <FontAwesomeIcon icon={faChevronRight} />
+                        </MobileInstancePickerChevron>
+                      </MobileInstancePicker>
+                    )}
+                  </MobileProductMetaSection>
+                )}
                 {drillProductNav && (
                   <nav aria-label={`${drillProductNav.label} navigation`}>
                     {drillProductNav.sections.map((section, si) => (
@@ -561,6 +609,18 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
           </>
         )}
       </DrawerPanel>
+
+      {isMobile && (
+        <SwitchInstanceModal
+          open={instanceModalOpen}
+          onClose={() => setInstanceModalOpen(false)}
+          connected={certCentralInstance.connected}
+          available={certCentralInstance.available}
+          currentId={certCentralInstance.current.id}
+          onSwitch={certCentralInstance.switchTo}
+          onAddConnected={certCentralInstance.addConnected}
+        />
+      )}
     </>
   );
 };
