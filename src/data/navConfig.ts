@@ -772,15 +772,15 @@ export const productNavConfig: Record<string, ProductNav> = {
 
   'settings-account': {
     id: 'settings-account',
-    label: 'Account settings',
+    label: 'Identity and access',
     route: '/settings/account',
-    ariaLabel: 'Account settings navigation',
+    ariaLabel: 'Identity and access navigation',
     sections: [
       {
         title: '',
         defaultExpanded: true,
         items: [
-          { label: 'Account settings', route: '/settings/account' },
+          { label: 'Identity and access', route: '/settings/account' },
         ],
       },
     ],

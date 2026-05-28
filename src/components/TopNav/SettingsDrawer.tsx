@@ -28,7 +28,7 @@ const drawerGroups = [
     items: ['My subscriptions', 'Receipts', 'Payment details'],
   },
   {
-    title: 'Account settings',
+    title: 'Identity and access',
     items: ['Overview', 'Access', 'Groups'],
   },
   {

@@ -76,7 +76,7 @@ const fallbackLabels: Record<string, string> = {
   '/settings/billing': 'My subscriptions',
   '/settings/billing/receipts': 'Receipts',
   '/settings/billing/payment-details': 'Payment details',
-  '/settings/account': 'Account settings',
+  '/settings/account': 'Identity and access',
   '/settings/product': 'Product settings',
   '/settings/integrations': 'Integrations',
   '/settings/api': 'API access',

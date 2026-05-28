@@ -16,7 +16,7 @@ interface SettingsDropdownProps {
 const settingsLinks = [
   { label: 'User management', route: '/settings/users', productId: 'settings-users' },
   { label: 'Billing and subscriptions', route: '/settings/billing', productId: 'settings-billing' },
-  { label: 'Account settings', route: '/settings/account', productId: 'settings-account' },
+  { label: 'Identity and access', route: '/settings/account', productId: 'settings-account' },
 ];
 
 export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ onClose, onSelectProduct }) => {

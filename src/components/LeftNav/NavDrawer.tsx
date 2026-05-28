@@ -311,7 +311,7 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
   const settingsItems = [
     { label: 'User management', route: '/settings/users' },
     { label: 'Billing and subscriptions', route: '/settings/billing' },
-    { label: 'Account settings', route: '/settings/account' },
+    { label: 'Identity and access', route: '/settings/account' },
   ];
 
   const helpItems = [
