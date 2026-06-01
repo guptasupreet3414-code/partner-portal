@@ -77,11 +77,14 @@ const fallbackLabels: Record<string, string> = {
   '/settings/billing/receipts': 'Receipts',
   '/settings/billing/payment-details': 'Payment details',
   '/settings/account': 'Identity and access',
+  '/settings/account/audit-logs': 'Audit logs',
   '/settings/product': 'Product settings',
   '/settings/integrations': 'Integrations',
   '/settings/api': 'API access',
   '/settings/audit-logs': 'Audit logs',
-  '/profile': 'My profile',
+  '/profile': 'Overview',
+  '/profile/access': 'Access',
+  '/profile/access-credentials': 'Access credentials',
 };
 
 export const StubPage: React.FC = () => {

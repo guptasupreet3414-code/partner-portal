@@ -13,10 +13,18 @@ interface SettingsDropdownProps {
   onSelectProduct: (id: string) => void;
 }
 
-const settingsLinks = [
+interface SettingsLink {
+  label: string;
+  route: string;
+  productId?: string;
+  external?: boolean;
+}
+
+const settingsLinks: SettingsLink[] = [
   { label: 'User management', route: '/settings/users', productId: 'settings-users' },
   { label: 'Billing and subscriptions', route: '/settings/billing', productId: 'settings-billing' },
-  { label: 'Identity and access', route: '/settings/account', productId: 'settings-account' },
+  { label: 'Account settings', route: '/settings/account', productId: 'settings-account' },
+  { label: 'Organizations', route: '/organizations.html', external: true },
 ];
 
 export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ onClose, onSelectProduct }) => {
@@ -31,9 +39,14 @@ export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ onClose, onS
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  const handleNav = (route: string, productId: string) => {
-    onSelectProduct(productId);
-    navigate(route);
+  const handleNav = (link: SettingsLink) => {
+    if (link.external) {
+      window.open(link.route, '_blank', 'noopener,noreferrer');
+      onClose();
+      return;
+    }
+    if (link.productId) onSelectProduct(link.productId);
+    navigate(link.route);
     onClose();
   };
 
@@ -46,9 +59,9 @@ export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ onClose, onS
           <DropdownItem
             key={link.route}
             role="menuitem"
-            onClick={() => handleNav(link.route, link.productId)}
+            onClick={() => handleNav(link)}
             tabIndex={0}
-            onKeyDown={e => { if (e.key === 'Enter') handleNav(link.route, link.productId); }}
+            onKeyDown={e => { if (e.key === 'Enter') handleNav(link); }}
           >
             {link.label}
           </DropdownItem>

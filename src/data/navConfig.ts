@@ -772,15 +772,16 @@ export const productNavConfig: Record<string, ProductNav> = {
 
   'settings-account': {
     id: 'settings-account',
-    label: 'Identity and access',
+    label: 'Account settings',
     route: '/settings/account',
-    ariaLabel: 'Identity and access navigation',
+    ariaLabel: 'Account settings navigation',
     sections: [
       {
         title: '',
         defaultExpanded: true,
         items: [
           { label: 'Identity and access', route: '/settings/account' },
+          { label: 'Audit logs', route: '/settings/account/audit-logs' },
         ],
       },
     ],
@@ -860,7 +861,9 @@ export const productNavConfig: Record<string, ProductNav> = {
         title: '',
         defaultExpanded: true,
         items: [
-          { label: 'My profile', route: '/profile' },
+          { label: 'Overview', route: '/profile' },
+          { label: 'Access', route: '/profile/access' },
+          { label: 'Access credentials', route: '/profile/access-credentials' },
         ],
       },
     ],

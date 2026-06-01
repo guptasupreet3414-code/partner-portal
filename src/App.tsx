@@ -215,11 +215,14 @@ const allRoutes = [
   '/settings/billing/receipts',
   '/settings/billing/payment-details',
   '/settings/account',
+  '/settings/account/audit-logs',
   '/settings/product',
   '/settings/integrations',
   '/settings/api',
   '/settings/audit-logs',
   '/profile',
+  '/profile/access',
+  '/profile/access-credentials',
 ];
 
 export const App: React.FC = () => {
