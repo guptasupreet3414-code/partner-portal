@@ -23,7 +23,10 @@ import {
   DrawerFooterLabel,
   DrawerFooterAvatar,
   MobileProductMetaSection,
-  MobilePlanTierPill,
+  MobilePlanFooter,
+  MobilePlanFooterPlan,
+  MobilePlanFooterSeats,
+  MobilePlanFooterTitle,
   MobileInstancePicker,
   MobileInstancePickerLabel,
   MobileInstancePickerRegion,
@@ -38,7 +41,7 @@ import {
 } from '../TopNav/TopNavDropdown.styles';
 import { IconClose, IconChevronLeft } from '../Icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear, faCircleQuestion, faChevronRight, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faCircleQuestion, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import {
   iconRailGroup1,
   iconRailGroup2,
@@ -447,23 +450,8 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
               </DrawerPaneHeader>
 
               <DrawerPaneScroll>
-                {drillProductNav && (drillProductNav.plan || drillProductNav.instance) && (
+                {drillProductNav?.instance && (
                   <MobileProductMetaSection>
-                    {drillProductNav.plan && (
-                      <MobilePlanTierPill
-                        type="button"
-                        $active={location.pathname === drillProductNav.plan.route}
-                        aria-current={location.pathname === drillProductNav.plan.route ? 'page' : undefined}
-                        onClick={() => {
-                          navigate(drillProductNav.plan!.route);
-                          onSelectProduct(drillProductId!);
-                        }}
-                        aria-label={`Current plan: ${drillProductNav.plan.tier}. View plans and upgrade options.`}
-                      >
-                        {drillProductNav.plan.tier} plan
-                        <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
-                      </MobilePlanTierPill>
-                    )}
                     {drillProductNav.instance && (
                       <MobileInstancePicker
                         type="button"
@@ -573,6 +561,31 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
                   </>
                 )}
               </DrawerPaneScroll>
+
+              {drillProductNav?.plan && (
+                <MobilePlanFooter
+                  type="button"
+                  $active={location.pathname === drillProductNav.plan.route}
+                  aria-current={location.pathname === drillProductNav.plan.route ? 'page' : undefined}
+                  onClick={() => {
+                    navigate(drillProductNav.plan!.route);
+                    onSelectProduct(drillProductId!);
+                  }}
+                  aria-label={`${drillProductNav.plan.tier} plan${
+                    drillProductNav.plan.seatsUsed != null && drillProductNav.plan.seatsTotal != null
+                      ? `, ${drillProductNav.plan.seatsUsed} of ${drillProductNav.plan.seatsTotal} seats used`
+                      : ''
+                  }. Manage billing and upgrade options.`}
+                >
+                  <MobilePlanFooterPlan>{drillProductNav.plan.tier} Plan</MobilePlanFooterPlan>
+                  {drillProductNav.plan.seatsUsed != null && drillProductNav.plan.seatsTotal != null && (
+                    <MobilePlanFooterSeats>
+                      {drillProductNav.plan.seatsUsed} / {drillProductNav.plan.seatsTotal} seats used
+                    </MobilePlanFooterSeats>
+                  )}
+                  <MobilePlanFooterTitle>Manage billing</MobilePlanFooterTitle>
+                </MobilePlanFooter>
+              )}
             </DrawerPane>
 
           </DrawerViewport>

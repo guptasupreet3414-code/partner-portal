@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import {
   SubNavWrapper,
   SubNavClip,
@@ -17,7 +17,10 @@ import {
   InstancePickerLabel,
   InstancePickerRegion,
   InstancePickerChevron,
-  PlanTierPill,
+  PlanFooter,
+  PlanFooterPlan,
+  PlanFooterSeats,
+  PlanFooterTitle,
 } from './ProductSubNav.styles';
 import { NavSection } from './NavSection';
 import { productNavConfig } from '../../data/navConfig';
@@ -72,19 +75,6 @@ export const ProductSubNav: React.FC<ProductSubNavProps> = ({
                 <SubNavHeader>
                   <SubNavTitle>{productNav.label}</SubNavTitle>
 
-                  {productNav.plan && (
-                    <PlanTierPill
-                      type="button"
-                      $active={location.pathname === productNav.plan.route}
-                      aria-current={location.pathname === productNav.plan.route ? 'page' : undefined}
-                      onClick={() => navigate(productNav.plan!.route)}
-                      aria-label={`Current plan: ${productNav.plan.tier}. View plans and upgrade options.`}
-                    >
-                      {productNav.plan.tier} plan
-                      <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
-                    </PlanTierPill>
-                  )}
-
                   {productNav.instance && (
                     <InstancePicker
                       type="button"
@@ -110,6 +100,28 @@ export const ProductSubNav: React.FC<ProductSubNavProps> = ({
                     ))}
                   </nav>
                 </SubNavScrollArea>
+
+                {productNav.plan && (
+                  <PlanFooter
+                    type="button"
+                    $active={location.pathname === productNav.plan.route}
+                    aria-current={location.pathname === productNav.plan.route ? 'page' : undefined}
+                    onClick={() => navigate(productNav.plan!.route)}
+                    aria-label={`${productNav.plan.tier} plan${
+                      productNav.plan.seatsUsed != null && productNav.plan.seatsTotal != null
+                        ? `, ${productNav.plan.seatsUsed} of ${productNav.plan.seatsTotal} seats used`
+                        : ''
+                    }. Manage billing and upgrade options.`}
+                  >
+                    <PlanFooterPlan>{productNav.plan.tier} Plan</PlanFooterPlan>
+                    {productNav.plan.seatsUsed != null && productNav.plan.seatsTotal != null && (
+                      <PlanFooterSeats>
+                        {productNav.plan.seatsUsed} / {productNav.plan.seatsTotal} seats used
+                      </PlanFooterSeats>
+                    )}
+                    <PlanFooterTitle>Manage billing</PlanFooterTitle>
+                  </PlanFooter>
+                )}
               </>
             )}
           </SubNavInner>

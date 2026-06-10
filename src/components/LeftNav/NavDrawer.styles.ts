@@ -238,39 +238,57 @@ export const MobileProductMetaSection = styled.div`
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 `;
 
-/* Touch-friendly version of the desktop PlanTierPill — same visual language
-   (blue tint + trailing arrow) but a 32px tap target. */
-export const MobilePlanTierPill = styled.button<{ $active: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 8px;
-  height: 32px;
-  padding: 0 14px;
-  border: 1px solid ${({ $active }) => ($active ? '#8FBEFF' : '#B3D4FF')};
-  border-radius: 16px;
-  background: ${({ $active }) => ($active ? '#D2E4FF' : '#E2EEFF')};
+/* Quiet footer pinned to the bottom of the mobile L2 pane for products with a
+   subscription plan — touch-friendly counterpart to the desktop PlanFooter.
+   Stacks the current plan name above the link; no arrow, transparent surface. */
+export const MobilePlanFooter = styled.button<{ $active: boolean }>`
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: ${({ $active }) => ($active ? '#E7EBEF' : 'transparent')};
   cursor: pointer;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px;
-  font-weight: 500;
-  color: #0048AC;
-  white-space: nowrap;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-
-  & > svg {
-    font-size: 11px;
-  }
+  text-align: left;
+  transition: background 0.12s;
 
   &:active {
-    background: #B3D4FF;
-    border-color: #6FA8FF;
-    color: #003E6B;
+    background: #ECEFF2;
   }
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.blue300};
-    outline-offset: 2px;
+    outline-offset: -2px;
+  }
+`;
+
+export const MobilePlanFooterPlan = styled.span`
+  font-size: 15px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.neutral800};
+  line-height: 1.3;
+`;
+
+export const MobilePlanFooterSeats = styled.span`
+  font-size: 13px;
+  font-weight: 400;
+  color: ${({ theme }) => theme.colors.neutral600};
+  line-height: 1.3;
+`;
+
+export const MobilePlanFooterTitle = styled.span`
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.neutral700};
+  line-height: 1.3;
+
+  ${MobilePlanFooter}:active & {
+    text-decoration: underline;
   }
 `;
 

@@ -1,14 +1,15 @@
 import React, { useRef, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import { TopNav } from './components/TopNav/TopNav';
 import { LeftNav } from './components/LeftNav/LeftNav';
 import { StubPage } from './pages/StubPage';
 import { ExplorePage } from './pages/ExplorePage';
 import { PlanPage } from './pages/PlanPage';
+import { BillingPage } from './pages/BillingPage';
 import { useNavState } from './hooks/useNavState';
 import { useBreakpoint, getNavMode } from './hooks/useBreakpoint';
-import { exploreProductIds, productNavConfig } from './data/navConfig';
+import { exploreProductIds, productNavConfig, getProductIdForRoute } from './data/navConfig';
 
 const GlobalStyle = createGlobalStyle`
   *, *::before, *::after {
@@ -26,6 +27,19 @@ const GlobalStyle = createGlobalStyle`
     background: ${({ theme }) => theme.colors.white};
     color: ${({ theme }) => theme.colors.neutral900};
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Visually-hidden but screen-reader accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   /* Skip-to-main */
@@ -244,6 +258,17 @@ export const App: React.FC = () => {
   const navMode = getNavMode(breakpoint);
   const isMobile = navMode === 'drawer';
 
+  // Keep the left nav (spoke) in sync with the URL, so arriving at a route by
+  // any means — breadcrumb, footer link, deep link — shows the spoke that owns
+  // it (e.g. /settings/billing/* shows the Billing nav). Only changes the
+  // product when the route resolves to a different one; unmatched routes leave
+  // the current product untouched.
+  const location = useLocation();
+  useEffect(() => {
+    const id = getProductIdForRoute(location.pathname);
+    if (id && id !== activeProductId) selectProduct(id);
+  }, [location.pathname, activeProductId, selectProduct]);
+
   // Close the drawer if the viewport grows beyond drawer mode
   useEffect(() => {
     if (navMode !== 'drawer' && isDrawerOpen) closeDrawer();
@@ -304,6 +329,7 @@ export const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/trust-lifecycle/plan" element={<PlanPage />} />
+          <Route path="/settings/billing/trust-lifecycle" element={<BillingPage />} />
           {[...exploreProductIds].map(id => (
             <Route key={id} path={`/${id}`} element={<ExplorePage productId={id} />} />
           ))}

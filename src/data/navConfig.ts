@@ -35,6 +35,10 @@ export interface ProductPlan {
   tier: string;
   /** Route to the plan / subscription page */
   route: string;
+  /** Seats currently in use — surfaced in the plan footer when paired with seatsTotal */
+  seatsUsed?: number;
+  /** Total seats on the subscription */
+  seatsTotal?: number;
 }
 
 export interface ProductInstanceConfig {
@@ -222,6 +226,18 @@ export const exploreProducts: Record<string, ExploreProduct> = {
   },
 };
 
+/**
+ * The account's current subscription plan. Single source of truth surfaced in
+ * the Trust Lifecycle spoke, the Settings (gear) menu, and the profile menu.
+ */
+export const currentPlan = {
+  name: 'Essentials',
+  /** Route to the manage-billing page (plans comparison + seats) */
+  route: '/settings/billing/trust-lifecycle',
+  seatsUsed: 25,
+  seatsTotal: 70,
+} as const;
+
 export const productNavConfig: Record<string, ProductNav> = {
   dashboard: {
     id: 'dashboard',
@@ -377,8 +393,10 @@ export const productNavConfig: Record<string, ProductNav> = {
     route: '/trust-lifecycle',
     ariaLabel: 'Trust Lifecycle navigation',
     plan: {
-      tier: 'Essentials',
-      route: '/trust-lifecycle/plan',
+      tier: currentPlan.name,
+      route: currentPlan.route,
+      seatsUsed: currentPlan.seatsUsed,
+      seatsTotal: currentPlan.seatsTotal,
     },
     sections: [
       {
@@ -880,6 +898,33 @@ export function getProductLandingRoute(productId: string): string {
   if (!nav) return `/${productId}`;
   const firstItem = nav.sections[0]?.items[0];
   return firstItem?.route ?? nav.route;
+}
+
+/** Maps the second path segment of a /settings/* route to its spoke product id. */
+const settingsRouteProductIds: Record<string, string> = {
+  users: 'settings-users',
+  billing: 'settings-billing',
+  account: 'settings-account',
+  product: 'settings-product',
+  integrations: 'settings-integrations',
+  api: 'settings-api',
+  'audit-logs': 'settings-audit-logs',
+};
+
+/**
+ * Resolves which product owns a given route so the left nav can stay in sync
+ * with the URL no matter how navigation was triggered (icon rail, breadcrumb,
+ * footer link, deep link). Returns null when no product owns the route, in
+ * which case callers should leave the active product unchanged.
+ */
+export function getProductIdForRoute(pathname: string): string | null {
+  const [top, sub] = pathname.split('/').filter(Boolean);
+  if (!top) return null;
+  if (top === 'settings') return settingsRouteProductIds[sub] ?? null;
+  if (top === 'profile') return 'profile';
+  if (productNavConfig[top]) return top;
+  if (exploreProductIds.has(top)) return top;
+  return null;
 }
 
 export interface Crumb {

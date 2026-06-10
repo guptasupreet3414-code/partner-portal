@@ -66,56 +66,6 @@ export const SubNavHeader = styled.div`
   flex-shrink: 0;
 `;
 
-/*
- * Plan tier pill — small clickable chip rendered under the product title for
- * products that carry a subscription plan (e.g. Trust Lifecycle). Soft blue
- * tint + arrow telegraphs "this navigates to the plan page" without competing
- * with the product title for attention.
- */
-export const PlanTierPill = styled.button<{ $active: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  align-self: flex-start;
-  height: 22px;
-  padding: 0 10px;
-  border: 1px solid ${({ $active }) => ($active ? '#8FBEFF' : '#B3D4FF')};
-  border-radius: 11px;
-  background: ${({ $active }) => ($active ? '#D2E4FF' : '#E2EEFF')};
-  cursor: pointer;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 12px;
-  font-weight: 500;
-  color: #0048AC;
-  white-space: nowrap;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-
-  & > svg {
-    font-size: 10px;
-    transition: transform 0.15s ease;
-  }
-
-  &:hover {
-    background: #D2E4FF;
-    border-color: #8FBEFF;
-
-    & > svg {
-      transform: translateX(2px);
-    }
-  }
-
-  &:active {
-    background: #B3D4FF;
-    border-color: #6FA8FF;
-    color: #003E6B;
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.blue300};
-    outline-offset: 2px;
-  }
-`;
-
 export const SubNavTitle = styled.h2`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: 20px;
@@ -193,6 +143,64 @@ export const SubNavScrollArea = styled.div`
   &::-webkit-scrollbar-thumb {
     background: ${({ theme }) => theme.colors.neutral300};
     border-radius: 2px;
+  }
+`;
+
+/*
+ * Plan footer — quiet, fixed strip pinned to the bottom of the spoke for
+ * products with a subscription plan. Sits outside the scroll area so it stays
+ * visible regardless of nav length, and routes to the plans / upgrade page.
+ * Stacks the current plan name (eyebrow) above the link; no arrow, transparent
+ * surface — it informs more than it shouts.
+ */
+export const PlanFooter = styled.button<{ $active: boolean }>`
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral300};
+  background: ${({ $active }) => ($active ? '#E7EBEF' : 'transparent')};
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  text-align: left;
+  transition: background 0.12s;
+
+  &:hover {
+    background: #ECEFF2;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: -2px;
+  }
+`;
+
+export const PlanFooterPlan = styled.span`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.neutral800};
+  line-height: 1.3;
+`;
+
+export const PlanFooterSeats = styled.span`
+  font-size: 12px;
+  font-weight: 400;
+  color: ${({ theme }) => theme.colors.neutral600};
+  line-height: 1.3;
+`;
+
+export const PlanFooterTitle = styled.span`
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.neutral700};
+  line-height: 1.3;
+
+  ${PlanFooter}:hover & {
+    text-decoration: underline;
   }
 `;
 
