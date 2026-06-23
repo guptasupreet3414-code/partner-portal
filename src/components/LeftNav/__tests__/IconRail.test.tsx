@@ -1,6 +1,6 @@
 import React from 'react';
-import { screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { renderWithProviders } from '../../../test/renderWithProviders';
 import { IconRail } from '../IconRail';
 
@@ -51,97 +51,36 @@ describe('IconRail', () => {
       fireEvent.click(screen.getByRole('button', { name: 'CertCentral' }));
       expect(onSelect).toHaveBeenCalledWith('certcentral');
     });
+
+    it('drops focus when the pointer leaves so the overlay can collapse on mouse-out', () => {
+      renderWithProviders(
+        <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
+      );
+      const nav = screen.getByRole('navigation', { name: 'Platform navigation' });
+      const btn = screen.getByRole('button', { name: 'CertCentral' });
+
+      // A click leaves focus on the button (which would hold the rail open via
+      // :focus-within); mouse-out should release it.
+      btn.focus();
+      expect(document.activeElement).toBe(btn);
+
+      fireEvent.mouseLeave(nav);
+      expect(document.activeElement).not.toBe(btn);
+    });
   });
 
-  describe('tooltip', () => {
-    beforeEach(() => { vi.useFakeTimers(); });
-    afterEach(() => { vi.useRealTimers(); });
-
-    it('tooltip is not visible before hover', () => {
+  describe('expandable labels', () => {
+    // The rail is icon-only at rest and expands on hover/focus to reveal the
+    // full product label next to each icon. The label is always in the DOM
+    // (CSS toggles its opacity); aria-label remains authoritative for a11y.
+    it('renders the full product label text for every product', () => {
       renderWithProviders(
         <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
       );
-      const tooltip = [...document.querySelectorAll('[role="tooltip"]')]
-        .find(el => el.textContent === 'CertCentral');
-      expect(tooltip).toHaveStyle({ opacity: '0' });
-    });
-
-    it('tooltip becomes visible after hover delay', async () => {
-      renderWithProviders(
-        <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
-      );
-      const btn = screen.getByRole('button', { name: 'CertCentral' });
-      fireEvent.mouseEnter(btn);
-
-      // Before delay — still hidden
-      const tooltip = [...document.querySelectorAll('[role="tooltip"]')]
-        .find(el => el.textContent === 'CertCentral')!;
-      expect(tooltip).toHaveStyle({ opacity: '0' });
-
-      // Advance timers inside act so React processes the resulting state update
-      await act(async () => { vi.advanceTimersByTime(350); });
-      expect(tooltip).toHaveStyle({ opacity: '1' });
-    });
-
-    it('tooltip is hidden immediately on mouse leave', async () => {
-      renderWithProviders(
-        <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
-      );
-      const btn = screen.getByRole('button', { name: 'CertCentral' });
-      fireEvent.mouseEnter(btn);
-      await act(async () => { vi.advanceTimersByTime(350); });
-
-      await act(async () => { fireEvent.mouseLeave(btn); });
-
-      const tooltip = [...document.querySelectorAll('[role="tooltip"]')]
-        .find(el => el.textContent === 'CertCentral');
-      expect(tooltip).toHaveStyle({ opacity: '0' });
-    });
-
-    it('shows tooltip immediately on keyboard focus (no delay)', async () => {
-      renderWithProviders(
-        <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
-      );
-      const btn = screen.getByRole('button', { name: 'CertCentral' });
-
-      // btn.focus() sets document.activeElement and triggers React onFocus
-      await act(async () => { btn.focus(); });
-
-      const tooltip = [...document.querySelectorAll('[role="tooltip"]')]
-        .find(el => el.textContent === 'CertCentral');
-      expect(tooltip).toHaveStyle({ opacity: '1' });
-    });
-
-    it('Escape dismisses the tooltip without moving focus', async () => {
-      renderWithProviders(
-        <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
-      );
-      const btn = screen.getByRole('button', { name: 'CertCentral' });
-
-      await act(async () => { btn.focus(); });
-
-      const tooltip = [...document.querySelectorAll('[role="tooltip"]')]
-        .find(el => el.textContent === 'CertCentral')!;
-      expect(tooltip).toHaveStyle({ opacity: '1' });
-
-      await act(async () => { fireEvent.keyDown(btn, { key: 'Escape' }); });
-      expect(tooltip).toHaveStyle({ opacity: '0' });
-      // Focus stays on the button — not moved to body or elsewhere
-      expect(document.activeElement).toBe(btn);
-    });
-
-    it('cancels pending hover timer when mouse leaves before delay elapses', async () => {
-      renderWithProviders(
-        <IconRail activeProductId="dashboard" onSelectProduct={vi.fn()} />
-      );
-      const btn = screen.getByRole('button', { name: 'CertCentral' });
-      fireEvent.mouseEnter(btn);
-      await act(async () => { fireEvent.mouseLeave(btn); });
-      await act(async () => { vi.advanceTimersByTime(350); });
-
-      const tooltip = [...document.querySelectorAll('[role="tooltip"]')]
-        .find(el => el.textContent === 'CertCentral');
-      expect(tooltip).toHaveStyle({ opacity: '0' });
+      // "Software Trust" previously showed an abbreviated "Software" caption —
+      // now the full label is rendered, ready to reveal on expand.
+      const btn = screen.getByRole('button', { name: 'Software Trust' });
+      expect(btn).toHaveTextContent('Software Trust');
     });
   });
 });

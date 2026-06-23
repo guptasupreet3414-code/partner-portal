@@ -20,6 +20,8 @@ export interface NavItem {
   badge?: boolean;
   /** Renders a circular number badge to the left of the label. Use on at most 1 item per product. */
   numberBadge?: number;
+  /** Opens `route` in a new tab (e.g. a standalone page) instead of routing in-app. */
+  external?: boolean;
 }
 
 export interface NavSection {
@@ -148,6 +150,13 @@ export const certCentralInstances: CertCentralInstance[] = [
 export interface IconRailProduct {
   id: string;
   label: string;
+  /**
+   * Short caption shown under the icon in the rail. Falls back to `label` when
+   * omitted. Use this to keep the visible caption on a single line — `label`
+   * (the full product name) is still used for the hover tooltip and aria-label,
+   * so screen readers and tooltips always get the complete name.
+   */
+  railLabel?: string;
   route: string;
   ariaLabel: string;
   Icon: IconComponent;
@@ -155,19 +164,19 @@ export interface IconRailProduct {
 
 export const iconRailGroup1: IconRailProduct[] = [
   { id: 'dashboard', label: 'Overview', route: '/dashboard', ariaLabel: 'Overview', Icon: OverviewIcon },
-  { id: 'quantum-central', label: 'Quantum Central', route: '/quantum-central', ariaLabel: 'Quantum Central', Icon: QuantumCentralIcon },
+  { id: 'quantum-central', label: 'Quantum Central', railLabel: 'Quantum', route: '/quantum-central', ariaLabel: 'Quantum Central', Icon: QuantumCentralIcon },
   { id: 'certcentral', label: 'CertCentral', route: '/certcentral', ariaLabel: 'CertCentral', Icon: CertcentralIcon },
   { id: 'private-ca', label: 'Private CA', route: '/private-ca', ariaLabel: 'Private CA', Icon: PrivateCaIcon },
-  { id: 'trust-lifecycle', label: 'Trust Lifecycle', route: '/trust-lifecycle', ariaLabel: 'Trust Lifecycle', Icon: TrustLifecycleIcon },
-  { id: 'software-trust', label: 'Software Trust', route: '/software-trust', ariaLabel: 'Software Trust', Icon: SoftwareTrustIcon },
-  { id: 'dns', label: 'DigiCert DNS', route: '/dns', ariaLabel: 'DigiCert DNS', Icon: DigicertDnsIcon },
-  { id: 'content-trust', label: 'Content Trust', route: '/content-trust', ariaLabel: 'Content Trust', Icon: ContentTrustIcon },
-  { id: 'device-trust', label: 'Device Trust', route: '/device-trust', ariaLabel: 'Device Trust', Icon: DeviceTrustIcon },
+  { id: 'trust-lifecycle', label: 'Trust Lifecycle', railLabel: 'Lifecycle', route: '/trust-lifecycle', ariaLabel: 'Trust Lifecycle', Icon: TrustLifecycleIcon },
+  { id: 'software-trust', label: 'Software Trust', railLabel: 'Software', route: '/software-trust', ariaLabel: 'Software Trust', Icon: SoftwareTrustIcon },
+  { id: 'dns', label: 'DigiCert DNS', railLabel: 'DNS', route: '/dns', ariaLabel: 'DigiCert DNS', Icon: DigicertDnsIcon },
+  { id: 'content-trust', label: 'Content Trust', railLabel: 'Content', route: '/content-trust', ariaLabel: 'Content Trust', Icon: ContentTrustIcon },
+  { id: 'device-trust', label: 'Device Trust', railLabel: 'Device', route: '/device-trust', ariaLabel: 'Device Trust', Icon: DeviceTrustIcon },
 ];
 
 /* "Explore" products — user does not have access. Clicking renders a landing page instead of a spoke nav. */
 export const iconRailGroup2: IconRailProduct[] = [
-  { id: 'ai-agents', label: 'AI Agents', route: '/ai-agents', ariaLabel: 'AI Agents', Icon: AiAgentsIcon },
+  { id: 'ai-agents', label: 'AI Agents', railLabel: 'AI Agents', route: '/ai-agents', ariaLabel: 'AI Agents', Icon: AiAgentsIcon },
   { id: 'valimail', label: 'Valimail', route: '/valimail', ariaLabel: 'Valimail', Icon: ValimailIcon },
 ];
 
@@ -800,6 +809,7 @@ export const productNavConfig: Record<string, ProductNav> = {
         items: [
           { label: 'Identity and access', route: '/settings/account' },
           { label: 'Audit logs', route: '/settings/account/audit-logs' },
+          { label: 'Organizations', route: '/organizations.html', external: true },
         ],
       },
     ],

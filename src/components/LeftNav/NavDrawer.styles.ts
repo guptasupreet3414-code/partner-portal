@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { NavLink } from 'react-router-dom';
 
 export const DrawerBackdrop = styled.div<{ $open: boolean }>`
@@ -357,8 +357,9 @@ export const DrawerSubSectionLabel = styled.div`
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
-/* Individual sub-nav link in Level 2 — matches the desktop spoke (NavItem) state ladder */
-export const DrawerSubNavLink = styled(NavLink)<{ $active: boolean }>`
+/* Shared style ladder for Level 2 sub-nav rows — used by both in-app links and
+   external (new-tab) links so they read identically. */
+const drawerSubNavStyles = css<{ $active: boolean }>`
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -391,6 +392,16 @@ export const DrawerSubNavLink = styled(NavLink)<{ $active: boolean }>`
     outline: 2px solid ${({ theme }) => theme.colors.blue300};
     outline-offset: -2px;
   }
+`;
+
+/* Individual sub-nav link in Level 2 — matches the desktop spoke (NavItem) state ladder */
+export const DrawerSubNavLink = styled(NavLink)<{ $active: boolean }>`
+  ${drawerSubNavStyles}
+`;
+
+/* External Level 2 row — opens a standalone page in a new tab. */
+export const DrawerSubNavExternal = styled.a<{ $active: boolean }>`
+  ${drawerSubNavStyles}
 `;
 
 /* ─── Desktop / tablet flat-list styles (unchanged) ─────────────────────── */

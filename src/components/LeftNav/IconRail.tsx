@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   RailContainer,
   RailGroup,
   RailDivider,
   RailButton,
-  RailTooltip,
+  RailLabel,
+  RailFade,
 } from './IconRail.styles';
 import { iconRailGroup1, iconRailGroup2, getProductLandingRoute, type IconRailProduct } from '../../data/navConfig';
 
@@ -15,60 +15,19 @@ interface IconRailProps {
   onSelectProduct: (id: string) => void;
 }
 
-const HOVER_DELAY_MS = 350;
-
 const RailItem: React.FC<{
   product: IconRailProduct;
   isActive: boolean;
   onSelect: (id: string) => void;
 }> = ({ product, isActive, onSelect }) => {
   const navigate = useNavigate();
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // y is the viewport centre-Y of the button — used for position: fixed tooltip placement
-  const [tip, setTip] = useState<{ visible: boolean; y: number }>({ visible: false, y: 0 });
-
-  // Clear pending hover timer on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimer.current) clearTimeout(hoverTimer.current);
-    };
-  }, []);
-
-  const getButtonMidY = (): number => {
-    const rect = buttonRef.current?.getBoundingClientRect();
-    return rect ? rect.top + rect.height / 2 : 0;
-  };
-
-  const showTip = (immediate: boolean) => {
-    if (hoverTimer.current) { clearTimeout(hoverTimer.current); hoverTimer.current = null; }
-    if (immediate) {
-      setTip({ visible: true, y: getButtonMidY() });
-    } else {
-      hoverTimer.current = setTimeout(() => {
-        setTip({ visible: true, y: getButtonMidY() });
-      }, HOVER_DELAY_MS);
-    }
-  };
-
-  const hideTip = () => {
-    if (hoverTimer.current) { clearTimeout(hoverTimer.current); hoverTimer.current = null; }
-    setTip(prev => ({ ...prev, visible: false }));
-  };
 
   const handleClick = () => {
-    hideTip();
     onSelect(product.id);
     navigate(getProductLandingRoute(product.id));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === 'Escape') {
-      // Dismiss tooltip only — do NOT move focus (WCAG 1.4.13)
-      hideTip();
-      return;
-    }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleClick();
@@ -76,45 +35,75 @@ const RailItem: React.FC<{
   };
 
   return (
-    <>
-      <RailButton
-        ref={buttonRef}
-        $active={isActive}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        onMouseEnter={() => showTip(false)}   // delayed — prevents flicker on mouse-across
-        onMouseLeave={hideTip}
-        onFocus={() => showTip(true)}          // immediate — keyboard users need instant feedback
-        onBlur={hideTip}
-        aria-label={product.ariaLabel}
-        aria-current={isActive ? 'page' : undefined}
-      >
-        <product.Icon aria-hidden="true" focusable="false" />
-      </RailButton>
-
-      {/*
-        * Portal to document.body: RailContainer is position:fixed with z-index and
-        * overflow:hidden — Chrome clips position:fixed descendants to that stacking
-        * context's visual bounds. A portal escapes the DOM subtree entirely.
-        */}
-      {createPortal(
-        <RailTooltip
-          $visible={tip.visible}
-          style={{ top: `${tip.y}px` }}
-          role="tooltip"
-          aria-hidden="true"
-        >
-          {product.label}
-        </RailTooltip>,
-        document.body
-      )}
-    </>
+    <RailButton
+      $active={isActive}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      aria-label={product.ariaLabel}
+      aria-current={isActive ? 'page' : undefined}
+    >
+      <product.Icon aria-hidden="true" focusable="false" />
+      {/* Full product name — hidden while collapsed, revealed when the rail
+          expands on hover/focus. aria-hidden: aria-label is authoritative. */}
+      <RailLabel aria-hidden="true">{product.label}</RailLabel>
+    </RailButton>
   );
 };
 
 export const IconRail: React.FC<IconRailProps> = ({ activeProductId, onSelectProduct }) => {
+  const containerRef = useRef<HTMLElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+
+  // Drive the edge fades: top fade once scrolled down, bottom fade while there's
+  // still content below the fold.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const scrollable = el.scrollHeight > el.clientHeight + 1;
+      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 1;
+      setCanScrollUp(scrollable && el.scrollTop > 1);
+      setCanScrollDown(scrollable && !atBottom);
+    };
+
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+
+    // Recompute when the rail's own size changes (e.g. viewport height shifts).
+    // Guarded: ResizeObserver is absent in some test/SSR environments.
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+    ro?.observe(el);
+
+    return () => {
+      el.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      ro?.disconnect();
+    };
+  }, []);
+
+  // The rail expands on :hover OR :focus-within. After a mouse click, focus
+  // lands on the selected button, so :focus-within would keep the overlay open
+  // even once the cursor leaves. Dropping focus when the pointer exits lets the
+  // overlay collapse on mouse-out. Genuine keyboard users don't fire mouseleave,
+  // so their focus (and the expanded rail) is preserved.
+  const handleMouseLeave = () => {
+    const el = containerRef.current;
+    if (el && document.activeElement instanceof HTMLElement && el.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+  };
+
   return (
-    <RailContainer aria-label="Platform navigation">
+    <RailContainer
+      ref={containerRef}
+      aria-label="Platform navigation"
+      onMouseLeave={handleMouseLeave}
+    >
+      <RailFade $edge="top" $visible={canScrollUp} aria-hidden="true" />
+
       <RailGroup>
         {iconRailGroup1.map(product => (
           <RailItem
@@ -138,6 +127,8 @@ export const IconRail: React.FC<IconRailProps> = ({ activeProductId, onSelectPro
           />
         ))}
       </RailGroup>
+
+      <RailFade $edge="bottom" $visible={canScrollDown} aria-hidden="true" />
     </RailContainer>
   );
 };

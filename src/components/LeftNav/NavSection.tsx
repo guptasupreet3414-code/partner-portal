@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { IconChevronDown, IconChevronUp } from '../Icons';
 import type { NavSection as NavSectionType } from '../../data/navConfig';
 
@@ -74,7 +74,8 @@ const ItemsContainer = styled.div<{ $open: boolean }>`
   transition: max-height 0.2s ease;
 `;
 
-const NavItem = styled(NavLink)`
+/* Shared row styling for both in-app (NavLink) and external (anchor) items. */
+const navItemStyles = css`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -112,6 +113,15 @@ const NavItem = styled(NavLink)`
     outline: 2px solid ${({ theme }) => theme.colors.blue300};
     outline-offset: -2px;
   }
+`;
+
+const NavItem = styled(NavLink)`
+  ${navItemStyles}
+`;
+
+/* External items open a standalone page in a new tab rather than routing in-app. */
+const ExternalNavItem = styled.a`
+  ${navItemStyles}
 `;
 
 const ItemLabel = styled.span`
@@ -169,20 +179,37 @@ export const NavSection: React.FC<NavSectionProps> = ({ section, index }) => {
         id={sectionId}
         $open={open || !hasTitle}
       >
-        {section.items.map((item) => (
-          <NavItem
-            key={item.route}
-            to={item.route}
-            end
-            aria-current={location.pathname === item.route ? 'page' : undefined}
-          >
-            <ItemLabel>{item.label}</ItemLabel>
-            {item.numberBadge !== undefined && (
-              <NumberBadge aria-label={`${item.numberBadge} items`}>{item.numberBadge}</NumberBadge>
-            )}
-            {item.badge && <NewBadge>New</NewBadge>}
-          </NavItem>
-        ))}
+        {section.items.map((item) => {
+          const contents = (
+            <>
+              <ItemLabel>{item.label}</ItemLabel>
+              {item.numberBadge !== undefined && (
+                <NumberBadge aria-label={`${item.numberBadge} items`}>{item.numberBadge}</NumberBadge>
+              )}
+              {item.badge && <NewBadge>New</NewBadge>}
+            </>
+          );
+
+          return item.external ? (
+            <ExternalNavItem
+              key={item.route}
+              href={item.route}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {contents}
+            </ExternalNavItem>
+          ) : (
+            <NavItem
+              key={item.route}
+              to={item.route}
+              end
+              aria-current={location.pathname === item.route ? 'page' : undefined}
+            >
+              {contents}
+            </NavItem>
+          );
+        })}
       </ItemsContainer>
     </SectionWrapper>
   );

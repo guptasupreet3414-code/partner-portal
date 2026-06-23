@@ -11,6 +11,7 @@ import {
   DrawerPaneScroll,
   DrawerSubSectionLabel,
   DrawerSubNavLink,
+  DrawerSubNavExternal,
   DrawerInner,
   DrawerGroup,
   DrawerDivider,
@@ -479,6 +480,20 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
                           <DrawerSubSectionLabel>{section.title}</DrawerSubSectionLabel>
                         )}
                         {section.items.map(item => {
+                          if (item.external) {
+                            return (
+                              <DrawerSubNavExternal
+                                key={item.route}
+                                href={item.route}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                $active={false}
+                                onClick={onClose}
+                              >
+                                {item.label}
+                              </DrawerSubNavExternal>
+                            );
+                          }
                           const isActive = location.pathname === item.route;
                           return (
                             <DrawerSubNavLink
