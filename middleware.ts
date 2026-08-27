@@ -1,33 +1,55 @@
 import { next } from '@vercel/edge';
-import { isAuthorized, unauthorizedResponse } from './src/lib/basicAuth';
 
-// Vercel Edge Middleware — the framework-agnostic equivalent of a Next.js
-// proxy layer. This is a static Vite SPA, so a `src/proxy.ts` would be bundled
-// into the *client* and could never see a server-only secret. A root-level
-// `middleware.ts` instead runs at the edge, before any static asset is served.
-//
-// `process.env` is provided by the Edge runtime; declared locally so this file
-// type-checks without pulling in @types/node.
-declare const process: { env: { SITE_USERNAME?: string; SITE_PASSWORD?: string } };
+declare const process: {
+  env: {
+    SITE_USERNAME?: string;
+    SITE_PASSWORD?: string;
+  };
+};
 
 export const config = {
-  // Gate every path, including assets, behind the password.
   matcher: '/(.*)',
 };
 
 export default function middleware(request: Request): Response {
-  const username = process.env.SITE_USERNAME;
-  const password = process.env.SITE_PASSWORD;
+  const expectedUsername = process.env.SITE_USERNAME;
+  const expectedPassword = process.env.SITE_PASSWORD;
 
-  if (!username || !password) {
-    return new Response('Server configuration error: auth credentials not set.', {
+  if (!expectedUsername || !expectedPassword) {
+    return new Response('Authentication is not configured.', {
       status: 500,
     });
   }
 
-  if (isAuthorized(request.headers.get('authorization'), username, password)) {
-    return next();
+  const authorization = request.headers.get('authorization');
+
+  if (authorization?.startsWith('Basic ')) {
+    try {
+      const decoded = atob(authorization.slice(6));
+      const separator = decoded.indexOf(':');
+
+      if (separator !== -1) {
+        const username = decoded.slice(0, separator);
+        const password = decoded.slice(separator + 1);
+
+        if (
+          username === expectedUsername &&
+          password === expectedPassword
+        ) {
+          return next();
+        }
+      }
+    } catch {
+      // Fall through to 401
+    }
   }
 
-  return unauthorizedResponse();
+  return new Response('Authentication required.', {
+    status: 401,
+    headers: {
+      'WWW-Authenticate':
+        'Basic realm="Protected", charset="UTF-8"',
+      'Cache-Control': 'private, no-store',
+    },
+  });
 }
