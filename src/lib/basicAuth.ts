@@ -1,13 +1,17 @@
 // Pure, dependency-free HTTP Basic Auth helpers shared by the Vercel Edge
 // Middleware (../../middleware.ts) and its unit test. Keeping the logic here —
-// with the password passed in as an argument rather than read from the
-// environment — means it never touches a secret and stays trivially testable.
+// with credentials passed in as arguments rather than read from the environment —
+// means it never touches a secret and stays trivially testable.
 
 /**
  * Returns true when an `Authorization: Basic <base64>` header carries the
- * expected password. The username is ignored (any username is accepted).
+ * exact expected username and password.
  */
-export function isAuthorized(authHeader: string | null, password: string): boolean {
+export function isAuthorized(
+  authHeader: string | null,
+  username: string,
+  password: string,
+): boolean {
   if (!authHeader) return false;
 
   const [scheme, encoded] = authHeader.split(' ');
@@ -24,7 +28,10 @@ export function isAuthorized(authHeader: string | null, password: string): boole
   const separator = decoded.indexOf(':');
   if (separator === -1) return false;
 
-  return decoded.slice(separator + 1) === password;
+  const sentUsername = decoded.slice(0, separator);
+  const sentPassword = decoded.slice(separator + 1);
+
+  return sentUsername === username && sentPassword === password;
 }
 
 /** The 401 challenge that prompts the browser's Basic Auth dialog. */

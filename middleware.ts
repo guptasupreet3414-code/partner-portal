@@ -8,7 +8,7 @@ import { isAuthorized, unauthorizedResponse } from './src/lib/basicAuth';
 //
 // `process.env` is provided by the Edge runtime; declared locally so this file
 // type-checks without pulling in @types/node.
-declare const process: { env: { SITE_AUTH_PASSWORD?: string } };
+declare const process: { env: { SITE_USERNAME?: string; SITE_PASSWORD?: string } };
 
 export const config = {
   // Gate every path, including assets, behind the password.
@@ -16,15 +16,16 @@ export const config = {
 };
 
 export default function middleware(request: Request): Response {
-  const password = process.env.SITE_AUTH_PASSWORD;
+  const username = process.env.SITE_USERNAME;
+  const password = process.env.SITE_PASSWORD;
 
-  // No password configured → gate disabled, so local dev and any environment
-  // without the secret stay fully open.
-  if (!password) {
-    return next();
+  if (!username || !password) {
+    return new Response('Server configuration error: auth credentials not set.', {
+      status: 500,
+    });
   }
 
-  if (isAuthorized(request.headers.get('authorization'), password)) {
+  if (isAuthorized(request.headers.get('authorization'), username, password)) {
     return next();
   }
 
