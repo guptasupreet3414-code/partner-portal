@@ -9,6 +9,8 @@ import {
   RailFade,
 } from './IconRail.styles';
 import { iconRailGroup1, iconRailGroup2, getProductLandingRoute, type IconRailProduct } from '../../data/navConfig';
+import { useWorkspace } from '../../context/WorkspaceContext';
+import { PartnerRailGuardrail } from '../PartnerRailGuardrail';
 
 interface IconRailProps {
   activeProductId: string;
@@ -19,10 +21,16 @@ const RailItem: React.FC<{
   product: IconRailProduct;
   isActive: boolean;
   onSelect: (id: string) => void;
-}> = ({ product, isActive, onSelect }) => {
+  onGuardrailRequest: (product: IconRailProduct) => void;
+  activeWorkspace: string;
+}> = ({ product, isActive, onSelect, onGuardrailRequest, activeWorkspace }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
+    if (activeWorkspace === 'partner' && product.id !== 'dashboard') {
+      onGuardrailRequest(product);
+      return;
+    }
     onSelect(product.id);
     navigate(getProductLandingRoute(product.id));
   };
@@ -54,6 +62,8 @@ export const IconRail: React.FC<IconRailProps> = ({ activeProductId, onSelectPro
   const containerRef = useRef<HTMLElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
+  const [guardrailProduct, setGuardrailProduct] = useState<IconRailProduct | null>(null);
+  const { activeWorkspace } = useWorkspace();
 
   // Drive the edge fades: top fade once scrolled down, bottom fade while there's
   // still content below the fold.
@@ -97,38 +107,53 @@ export const IconRail: React.FC<IconRailProps> = ({ activeProductId, onSelectPro
   };
 
   return (
-    <RailContainer
-      ref={containerRef}
-      aria-label="Platform navigation"
-      onMouseLeave={handleMouseLeave}
-    >
-      <RailFade $edge="top" $visible={canScrollUp} aria-hidden="true" />
+    <>
+      <RailContainer
+        ref={containerRef}
+        aria-label="Platform navigation"
+        onMouseLeave={handleMouseLeave}
+      >
+        <RailFade $edge="top" $visible={canScrollUp} aria-hidden="true" />
 
-      <RailGroup>
-        {iconRailGroup1.map(product => (
-          <RailItem
-            key={product.id}
-            product={product}
-            isActive={activeProductId === product.id}
-            onSelect={onSelectProduct}
-          />
-        ))}
-      </RailGroup>
+        <RailGroup>
+          {iconRailGroup1.map(product => (
+            <RailItem
+              key={product.id}
+              product={product}
+              isActive={activeProductId === product.id}
+              onSelect={onSelectProduct}
+              onGuardrailRequest={setGuardrailProduct}
+              activeWorkspace={activeWorkspace}
+            />
+          ))}
+        </RailGroup>
 
-      <RailDivider />
+        <RailDivider />
 
-      <RailGroup>
-        {iconRailGroup2.map(product => (
-          <RailItem
-            key={product.id}
-            product={product}
-            isActive={activeProductId === product.id}
-            onSelect={onSelectProduct}
-          />
-        ))}
-      </RailGroup>
+        <RailGroup>
+          {iconRailGroup2.map(product => (
+            <RailItem
+              key={product.id}
+              product={product}
+              isActive={activeProductId === product.id}
+              onSelect={onSelectProduct}
+              onGuardrailRequest={setGuardrailProduct}
+              activeWorkspace={activeWorkspace}
+            />
+          ))}
+        </RailGroup>
 
-      <RailFade $edge="bottom" $visible={canScrollDown} aria-hidden="true" />
-    </RailContainer>
+        <RailFade $edge="bottom" $visible={canScrollDown} aria-hidden="true" />
+      </RailContainer>
+
+      {guardrailProduct && (
+        <PartnerRailGuardrail
+          productId={guardrailProduct.id}
+          productLabel={guardrailProduct.label}
+          onClose={() => setGuardrailProduct(null)}
+          onSelectProduct={onSelectProduct}
+        />
+      )}
+    </>
   );
 };

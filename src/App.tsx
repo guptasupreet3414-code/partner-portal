@@ -7,6 +7,16 @@ import { StubPage } from './pages/StubPage';
 import { ExplorePage } from './pages/ExplorePage';
 import { PlanPage } from './pages/PlanPage';
 import { BillingPage } from './pages/BillingPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { UsersPage } from './pages/UsersPage';
+import { MySubscriptionsPage } from './pages/MySubscriptionsPage';
+import { PartnerPortfolioPage } from './pages/partner/PartnerPortfolioPage';
+import { PartnerCustomersPage } from './pages/partner/PartnerCustomersPage';
+import { CustomerDetailPage } from './pages/partner/CustomerDetailPage';
+import { PartnerEntitlementsPage } from './pages/partner/PartnerEntitlementsPage';
+import { PartnerReportsPage } from './pages/partner/PartnerReportsPage';
+import { PartnerActivityPage } from './pages/partner/PartnerActivityPage';
+import { WorkspaceProvider } from './context/WorkspaceContext';
 import { useNavState } from './hooks/useNavState';
 import { useBreakpoint, getNavMode } from './hooks/useBreakpoint';
 import { exploreProductIds, productNavConfig, getProductIdForRoute } from './data/navConfig';
@@ -296,49 +306,67 @@ export const App: React.FC = () => {
   const rightOffset = '0px';
 
   return (
-    <AppShell>
-      <GlobalStyle />
-      <a href="#main-content" className="skip-link">Skip to main content</a>
+    <WorkspaceProvider>
+      <AppShell>
+        <GlobalStyle />
+        <a href="#main-content" className="skip-link">Skip to main content</a>
 
-      <TopNav
-        isDrawerOpen={isDrawerOpen}
-        onToggleDrawer={toggleDrawer}
-        activeTopNav={activeTopNav}
-        onOpenTopNav={openTopNav}
-        onCloseTopNav={closeTopNav}
-        onSelectProduct={selectProduct}
-      />
+        <TopNav
+          isDrawerOpen={isDrawerOpen}
+          onToggleDrawer={toggleDrawer}
+          activeTopNav={activeTopNav}
+          onOpenTopNav={openTopNav}
+          onCloseTopNav={closeTopNav}
+          onSelectProduct={selectProduct}
+        />
 
-      <LeftNav
-        activeProductId={activeProductId}
-        isDrawerOpen={isDrawerOpen}
-        isSpokeOpen={isSpokeOpen}
-        isMobile={isMobile}
-        onSelectProduct={selectProduct}
-        onSelectProductFromDrawer={selectProductFromDrawer}
-        onCloseDrawer={closeDrawer}
-        onToggleSpoke={toggleSpoke}
-      />
+        <LeftNav
+          activeProductId={activeProductId}
+          isDrawerOpen={isDrawerOpen}
+          isSpokeOpen={isSpokeOpen}
+          isMobile={isMobile}
+          onSelectProduct={selectProduct}
+          onSelectProductFromDrawer={selectProductFromDrawer}
+          onCloseDrawer={closeDrawer}
+          onToggleSpoke={toggleSpoke}
+        />
 
-      <ContentArea
-        ref={contentRef}
-        id="main-content"
-        $leftOffset={leftOffset}
-        $rightOffset={rightOffset}
-      >
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/trust-lifecycle/plan" element={<PlanPage />} />
-          <Route path="/settings/billing/trust-lifecycle" element={<BillingPage />} />
-          {[...exploreProductIds].map(id => (
-            <Route key={id} path={`/${id}`} element={<ExplorePage productId={id} />} />
-          ))}
-          {allRoutes.filter(r => r !== '/' && r !== '/trust-lifecycle/plan' && ![...exploreProductIds].some(id => r === `/${id}` || r.startsWith(`/${id}/`))).map(route => (
-            <Route key={route} path={route} element={<StubPage />} />
-          ))}
-          <Route path="*" element={<StubPage />} />
-        </Routes>
-      </ContentArea>
-    </AppShell>
+        <ContentArea
+          ref={contentRef}
+          id="main-content"
+          $leftOffset={leftOffset}
+          $rightOffset={rightOffset}
+        >
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/trust-lifecycle/plan" element={<PlanPage />} />
+            <Route path="/settings/billing/trust-lifecycle" element={<BillingPage />} />
+            <Route path="/settings/billing" element={<MySubscriptionsPage />} />
+            <Route path="/settings/users" element={<UsersPage />} />
+            <Route path="/partner" element={<PartnerPortfolioPage />} />
+            <Route path="/partner/customers" element={<PartnerCustomersPage />} />
+            <Route path="/partner/customers/:customerId" element={<CustomerDetailPage />} />
+            <Route path="/partner/entitlements" element={<PartnerEntitlementsPage />} />
+            <Route path="/partner/reports" element={<PartnerReportsPage />} />
+            <Route path="/partner/activity" element={<PartnerActivityPage />} />
+            {[...exploreProductIds].map(id => (
+              <Route key={id} path={`/${id}`} element={<ExplorePage productId={id} />} />
+            ))}
+            {allRoutes.filter(r =>
+              r !== '/' &&
+              r !== '/dashboard' &&
+              r !== '/trust-lifecycle/plan' &&
+              r !== '/settings/billing' &&
+              r !== '/settings/users' &&
+              ![...exploreProductIds].some(id => r === `/${id}` || r.startsWith(`/${id}/`))
+            ).map(route => (
+              <Route key={route} path={route} element={<StubPage />} />
+            ))}
+            <Route path="*" element={<StubPage />} />
+          </Routes>
+        </ContentArea>
+      </AppShell>
+    </WorkspaceProvider>
   );
 };

@@ -896,6 +896,26 @@ export const productNavConfig: Record<string, ProductNav> = {
       },
     ],
   },
+
+  partner: {
+    id: 'partner',
+    label: 'Partner workspace',
+    route: '/partner',
+    ariaLabel: 'Partner workspace navigation',
+    sections: [
+      {
+        title: '',
+        defaultExpanded: true,
+        items: [
+          { label: 'Overview', route: '/partner' },
+          { label: 'Customers', route: '/partner/customers' },
+          { label: 'Entitlements', route: '/partner/entitlements' },
+          { label: 'Reports', route: '/partner/reports' },
+          { label: 'Activity', route: '/partner/activity' },
+        ],
+      },
+    ],
+  },
 };
 
 /**
@@ -928,10 +948,12 @@ const settingsRouteProductIds: Record<string, string> = {
  * which case callers should leave the active product unchanged.
  */
 export function getProductIdForRoute(pathname: string): string | null {
-  const [top, sub] = pathname.split('/').filter(Boolean);
+  const parts = pathname.split('/').filter(Boolean);
+  const [top, sub] = parts;
   if (!top) return null;
   if (top === 'settings') return settingsRouteProductIds[sub] ?? null;
   if (top === 'profile') return 'profile';
+  if (top === 'partner') return 'partner';
   if (productNavConfig[top]) return top;
   if (exploreProductIds.has(top)) return top;
   return null;

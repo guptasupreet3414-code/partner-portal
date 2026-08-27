@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   TopNavBar,
   NavLeft,
@@ -18,6 +18,7 @@ import { HelpDropdown } from './HelpDropdown';
 import { ProfileDropdown } from './ProfileDropdown';
 import { CartPanel } from './CartPanel';
 import { TransparentBackdrop } from './TopNavDropdown.styles';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { IconHamburger } from '../Icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCartShopping, faGear, faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
@@ -43,6 +44,12 @@ export const TopNav: React.FC<TopNavProps> = ({
   cartCount = 3,
 }) => {
   const hasDropdown = activeTopNav === 'settings' || activeTopNav === 'help' || activeTopNav === 'profile';
+  const [workspaceSwitcherOpen, setWorkspaceSwitcherOpen] = useState(false);
+
+  const handleOpenWorkspaceSwitcher = () => {
+    onCloseTopNav();
+    setWorkspaceSwitcherOpen(true);
+  };
 
   return (
     <>
@@ -60,6 +67,11 @@ export const TopNav: React.FC<TopNavProps> = ({
             </IconButton>
           </HamburgerWrapper>
           <LogoImage src={digicertOneLogo} alt="DigiCert ONE" />
+          <WorkspaceSwitcher
+            isOpen={workspaceSwitcherOpen}
+            onOpen={handleOpenWorkspaceSwitcher}
+            onClose={() => setWorkspaceSwitcherOpen(false)}
+          />
         </NavLeft>
 
         <NavRight>
@@ -132,6 +144,7 @@ export const TopNav: React.FC<TopNavProps> = ({
 
       {/* Transparent backdrop closes dropdowns when clicking outside */}
       {hasDropdown && <TransparentBackdrop onClick={onCloseTopNav} aria-hidden="true" />}
+
 
       {/* Cart — right-side overlay panel */}
       <CartPanel open={activeTopNav === 'cart'} onClose={onCloseTopNav} />

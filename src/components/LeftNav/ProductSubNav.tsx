@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import {
@@ -28,6 +29,33 @@ import { useCertCentralInstance } from '../../hooks/useCertCentralInstance';
 import { SwitchInstanceModal } from '../SwitchInstanceModal/SwitchInstanceModal';
 import ExpandIcon from '../../assets/expand.svg?react';
 import CollapseIcon from '../../assets/collapse.svg?react';
+
+const NavBackButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 9px 16px;
+  border: none;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral300};
+  background: transparent;
+  color: ${({ theme }) => theme.colors.blue300};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.blue300};
+    outline-offset: -2px;
+  }
+`;
 
 interface ProductSubNavProps {
   activeProductId: string;
@@ -72,6 +100,11 @@ export const ProductSubNav: React.FC<ProductSubNavProps> = ({
           <SubNavInner $open={isSpokeOpen}>
             {productNav && (
               <>
+                {['settings-users', 'settings-billing', 'settings-account'].includes(activeProductId) && (
+                  <NavBackButton onClick={() => navigate(-1)} aria-label="Go back">
+                    ‹ Back
+                  </NavBackButton>
+                )}
                 <SubNavHeader>
                   <SubNavTitle>{productNav.label}</SubNavTitle>
 
