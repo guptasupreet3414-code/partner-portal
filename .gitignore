@@ -11,6 +11,7 @@ out/
 
 # Environment variables
 .env
+.npmrc
 .env.local
 .env.development.local
 .env.test.local
