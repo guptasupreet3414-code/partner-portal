@@ -1,0 +1,64 @@
+/* DigiCert ONE — AG Grid / Quartz theme overrides */
+
+.dco-ag-table.ag-theme-quartz {
+  --ag-font-family: Roboto, 'Inter', system-ui, sans-serif;
+  --ag-font-size: 13px;
+  --ag-background-color: #ffffff;
+  --ag-foreground-color: #1a1f24;
+  --ag-header-background-color: #f9fafb;
+  --ag-header-foreground-color: #636a6e;
+  --ag-border-color: #e7ebef;
+  --ag-secondary-border-color: #e7ebef;
+  --ag-row-border-color: #e7ebef;
+  --ag-row-hover-color: #f9fafb;
+  --ag-selected-row-background-color: #edf6fc;
+  --ag-odd-row-background-color: #ffffff;
+  --ag-cell-horizontal-padding: 16px;
+  --ag-active-color: #0174c3;
+  --ag-checkbox-checked-color: #0174c3;
+  --ag-range-selection-border-color: #0174c3;
+  --ag-borders: solid 1px;
+  --ag-border-radius: 0;
+  --ag-wrapper-border-radius: 0;
+  --ag-row-height: 44px;
+  --ag-header-height: 40px;
+  --ag-column-hover-color: transparent;
+}
+
+/* Header label styling — uppercase, tracked, muted */
+.dco-ag-table .ag-header-cell-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #636a6e;
+}
+
+/* Suppress sort icon color shift */
+.dco-ag-table .ag-header-cell-sorted-asc .ag-header-cell-text,
+.dco-ag-table .ag-header-cell-sorted-desc .ag-header-cell-text {
+  color: #0174c3;
+}
+
+/* Row cursor for clickable tables */
+.dco-ag-table.dco-ag-clickable .ag-row {
+  cursor: pointer;
+}
+
+/* Cell vertical centering */
+.dco-ag-table .ag-cell {
+  display: flex;
+  align-items: center;
+  line-height: 1.35;
+}
+
+/* Remove cell selection outline */
+.dco-ag-table .ag-cell:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* No bottom border on last row */
+.dco-ag-table .ag-row:last-child {
+  border-bottom: none;
+}

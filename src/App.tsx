@@ -16,6 +16,9 @@ import { CustomerDetailPage } from './pages/partner/CustomerDetailPage';
 import { PartnerEntitlementsPage } from './pages/partner/PartnerEntitlementsPage';
 import { PartnerReportsPage } from './pages/partner/PartnerReportsPage';
 import { PartnerActivityPage } from './pages/partner/PartnerActivityPage';
+import { HierarchyPage } from './pages/partner/HierarchyPage';
+import { PartnerUsersPage } from './pages/partner/PartnerUsersPage';
+import { CustomerOnboardingPage } from './pages/partner/CustomerOnboardingPage';
 import { WorkspaceProvider } from './context/WorkspaceContext';
 import { useNavState } from './hooks/useNavState';
 import { useBreakpoint, getNavMode } from './hooks/useBreakpoint';
@@ -346,10 +349,13 @@ export const App: React.FC = () => {
             <Route path="/settings/users" element={<UsersPage />} />
             <Route path="/partner" element={<PartnerPortfolioPage />} />
             <Route path="/partner/customers" element={<PartnerCustomersPage />} />
+            <Route path="/partner/customers/new" element={<CustomerOnboardingPage />} />
             <Route path="/partner/customers/:customerId" element={<CustomerDetailPage />} />
+            <Route path="/partner/hierarchy" element={<HierarchyPage />} />
             <Route path="/partner/entitlements" element={<PartnerEntitlementsPage />} />
             <Route path="/partner/reports" element={<PartnerReportsPage />} />
             <Route path="/partner/activity" element={<PartnerActivityPage />} />
+            <Route path="/partner/users" element={<PartnerUsersPage />} />
             {[...exploreProductIds].map(id => (
               <Route key={id} path={`/${id}`} element={<ExplorePage productId={id} />} />
             ))}

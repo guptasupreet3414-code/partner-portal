@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import type { ColDef } from '@ag-grid-community/core';
 import { entitlementRows, customers } from '../../data/partnerData';
+import { AgTable, AgTableCard } from '../../components/AgTable/AgTable';
+import { ProgressBarRenderer, StatusBadgeRenderer } from '../../components/AgTable/renderers';
 
 const PageWrapper = styled.main``;
 
@@ -172,6 +175,81 @@ const PageButton = styled.button<{ $active?: boolean }>`
   }
 `;
 
+/* ── Product summary cards (UX-12) ───────────────────────────────── */
+
+const SummaryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+`;
+
+const SummaryCard = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: 16px 18px;
+  background: ${({ theme }) => theme.colors.white};
+`;
+
+const SummaryCardHeader = styled.div`
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+`;
+
+const SummaryCardProduct = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; font-weight: 600; color: ${({ theme }) => theme.colors.neutral900};
+`;
+
+const SummaryCardAtRisk = styled.div<{ $count: number }>`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 100px;
+  background: ${({ $count }) => $count > 0 ? '#FEF3C7' : '#D1FAE5'};
+  color: ${({ $count }) => $count > 0 ? '#92400E' : '#065F46'};
+`;
+
+const SummaryAlloc = styled.div`
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+`;
+
+const SummaryAllocLabel = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px; color: ${({ theme }) => theme.colors.neutral500};
+`;
+
+const SummaryAllocValue = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px; font-weight: 600; color: ${({ theme }) => theme.colors.neutral800};
+`;
+
+const SummaryBarWrap = styled.div`
+  height: 8px; border-radius: 4px;
+  background: ${({ theme }) => theme.colors.neutral100};
+  overflow: hidden; margin-bottom: 6px; position: relative;
+`;
+
+const SummaryBarFill = styled.div<{ $pct: number }>`
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: ${({ $pct }) => Math.min($pct, 100)}%;
+  background: ${({ $pct }) => $pct >= 95 ? '#DC2626' : $pct >= 80 ? '#F59E0B' : '#0174C3'};
+  border-radius: 4px;
+`;
+
+const SummaryBarPct = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 11px; color: ${({ theme }) => theme.colors.neutral500};
+  text-align: right;
+`;
+
+const SectionLabel = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: ${({ theme }) => theme.colors.neutral500};
+  margin-bottom: 12px;
+`;
+
 const uniqueProducts = [...new Set(entitlementRows.map(r => r.productLabel))].sort();
 
 export const PartnerEntitlementsPage: React.FC = () => {
@@ -190,10 +268,71 @@ export const PartnerEntitlementsPage: React.FC = () => {
     return matchCustomer && matchProduct && matchStatus;
   });
 
+  const entitlementRowData = useMemo(() => filtered.map(row => ({
+    customerName: row.customerName,
+    productLabel: row.productLabel,
+    entitlementLabel: row.entitlementLabel,
+    allocated: row.allocated,
+    consumed: row.consumed,
+    remaining: row.allocated - row.consumed,
+    pct: Math.round((row.consumed / row.allocated) * 100),
+    status: row.status,
+  })), [filtered]);
+
+  const entitlementColDefs: ColDef[] = useMemo(() => [
+    { field: 'customerName',    headerName: 'Customer',    flex: 1.5, minWidth: 140, cellStyle: { fontWeight: 600 } },
+    { field: 'productLabel',    headerName: 'Product',     flex: 1, minWidth: 120 },
+    { field: 'entitlementLabel', headerName: 'Entitlement', flex: 1.5, minWidth: 140 },
+    { field: 'allocated',       headerName: 'Allocated',   width: 110, type: 'numericColumn', valueFormatter: p => p.value?.toLocaleString() },
+    { field: 'consumed',        headerName: 'Consumed',    width: 110, type: 'numericColumn', valueFormatter: p => p.value?.toLocaleString() },
+    { field: 'remaining',       headerName: 'Remaining',   width: 110, type: 'numericColumn', valueFormatter: p => p.value?.toLocaleString() },
+    { field: 'pct',             headerName: 'Utilization', cellRenderer: ProgressBarRenderer, flex: 1, minWidth: 160 },
+    { field: 'status',          headerName: 'Status',      cellRenderer: StatusBadgeRenderer, width: 160 },
+  ], []);
+
+  /* Compute per-product aggregates for summary cards */
+  const productSummaries = uniqueProducts.map(product => {
+    const rows = entitlementRows.filter(r => r.productLabel === product);
+    const totalAllocated = rows.reduce((s, r) => s + r.allocated, 0);
+    const totalConsumed = rows.reduce((s, r) => s + r.consumed, 0);
+    const atRisk = rows.filter(r => r.status !== 'Healthy').length;
+    const pct = totalAllocated > 0 ? Math.round((totalConsumed / totalAllocated) * 100) : 0;
+    return { product, totalAllocated, totalConsumed, atRisk, pct };
+  });
+
   return (
     <PageWrapper>
       <PageTitle>Entitlements</PageTitle>
-      <ContextLine>Partner workspace · ABC Security</ContextLine>
+      <ContextLine>Partner workspace · ABC Security · Last updated a few minutes ago</ContextLine>
+
+      {/* UX-12 — Product-level visual summary */}
+      <SectionLabel>Capacity overview by service</SectionLabel>
+      <SummaryGrid>
+        {productSummaries.map(({ product, totalAllocated, totalConsumed, atRisk, pct }) => (
+          <SummaryCard key={product}>
+            <SummaryCardHeader>
+              <SummaryCardProduct>{product}</SummaryCardProduct>
+              <SummaryCardAtRisk $count={atRisk}>
+                {atRisk === 0 ? 'All healthy' : `${atRisk} at risk`}
+              </SummaryCardAtRisk>
+            </SummaryCardHeader>
+            <SummaryAlloc>
+              <SummaryAllocLabel>Allocated to customers</SummaryAllocLabel>
+              <SummaryAllocValue>{totalAllocated.toLocaleString()}</SummaryAllocValue>
+            </SummaryAlloc>
+            <SummaryBarWrap>
+              <SummaryBarFill $pct={pct} />
+            </SummaryBarWrap>
+            <SummaryAlloc>
+              <SummaryAllocLabel>Consumed</SummaryAllocLabel>
+              <SummaryAllocValue>{totalConsumed.toLocaleString()}</SummaryAllocValue>
+            </SummaryAlloc>
+            <SummaryBarPct>{pct}% consumed of allocated</SummaryBarPct>
+          </SummaryCard>
+        ))}
+      </SummaryGrid>
+
+      <SectionLabel>Entitlement details</SectionLabel>
 
       <Toolbar>
         <FilterSelect
@@ -231,64 +370,9 @@ export const PartnerEntitlementsPage: React.FC = () => {
         </FilterSelect>
       </Toolbar>
 
-      <TableWrapper>
-        <Table>
-          <thead>
-            <tr>
-              <Th>Customer</Th>
-              <Th>Product</Th>
-              <Th>Entitlement</Th>
-              <Th>Allocated</Th>
-              <Th>Consumed</Th>
-              <Th>Remaining</Th>
-              <Th>Utilization</Th>
-              <Th>Status</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((row, idx) => {
-              const pct = Math.round((row.consumed / row.allocated) * 100);
-              const remaining = row.allocated - row.consumed;
-              return (
-                <Tr key={idx}>
-                  <Td><CustomerCell>{row.customerName}</CustomerCell></Td>
-                  <Td>{row.productLabel}</Td>
-                  <Td>{row.entitlementLabel}</Td>
-                  <Td>{row.allocated.toLocaleString()}</Td>
-                  <Td>{row.consumed.toLocaleString()}</Td>
-                  <Td>{remaining.toLocaleString()}</Td>
-                  <Td>
-                    <UtilBar>
-                      <ProgressBar>
-                        <ProgressFill $pct={pct} />
-                      </ProgressBar>
-                      <PctLabel>{pct}%</PctLabel>
-                    </UtilBar>
-                  </Td>
-                  <Td>
-                    <StatusBadge $status={row.status}>{row.status}</StatusBadge>
-                  </Td>
-                </Tr>
-              );
-            })}
-            {filtered.length === 0 && (
-              <tr>
-                <Td colSpan={8} style={{ textAlign: 'center', color: '#757D82', padding: '32px' }}>
-                  No entitlements match your filters.
-                </Td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-        <Pagination>
-          <span>Showing {filtered.length} of {entitlementRows.length} entitlements</span>
-          <PaginationButtons>
-            <PageButton disabled>← Prev</PageButton>
-            <PageButton $active>1</PageButton>
-            <PageButton disabled>Next →</PageButton>
-          </PaginationButtons>
-        </Pagination>
-      </TableWrapper>
+      <AgTableCard>
+        <AgTable rowData={entitlementRowData} columnDefs={entitlementColDefs} />
+      </AgTableCard>
     </PageWrapper>
   );
 };

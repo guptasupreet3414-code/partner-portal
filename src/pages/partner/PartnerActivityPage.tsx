@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import type { ColDef } from '@ag-grid-community/core';
 import { activityEvents, customers } from '../../data/partnerData';
+import { AgTable, AgTableCard } from '../../components/AgTable/AgTable';
+import { StatusBadgeRenderer } from '../../components/AgTable/renderers';
 
 const PageWrapper = styled.main``;
 
@@ -159,6 +162,24 @@ export const PartnerActivityPage: React.FC = () => {
     return matchCustomer && matchStatus;
   });
 
+  const rowData = useMemo(() => filtered.map(ev => ({
+    timestamp: formatTime(ev.timestamp),
+    customerName: ev.customerName,
+    productLabel: ev.productLabel,
+    activity: ev.activity,
+    status: ev.status,
+    performedBy: ev.performedBy,
+  })), [filtered]);
+
+  const colDefs = useMemo(() => ([
+    { field: 'timestamp',    headerName: 'Time',              width: 160 },
+    { field: 'customerName', headerName: 'Customer',          flex: 1, minWidth: 140 },
+    { field: 'productLabel', headerName: 'Product / Service', flex: 1, minWidth: 140 },
+    { field: 'activity',     headerName: 'Activity',          flex: 2, minWidth: 180 },
+    { field: 'status',       headerName: 'Status',            cellRenderer: StatusBadgeRenderer, width: 140 },
+    { field: 'performedBy',  headerName: 'Performed by',      flex: 1, minWidth: 140 },
+  ] as ColDef[]), []);
+
   return (
     <PageWrapper>
       <PageTitle>Activity</PageTitle>
@@ -189,47 +210,9 @@ export const PartnerActivityPage: React.FC = () => {
         </FilterSelect>
       </Toolbar>
 
-      <TableWrapper>
-        <Table>
-          <thead>
-            <tr>
-              <Th>Time</Th>
-              <Th>Customer</Th>
-              <Th>Product / Service</Th>
-              <Th>Activity</Th>
-              <Th>Status</Th>
-              <Th>Performed by</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(event => (
-              <Tr key={event.id}>
-                <Td><TimeCell>{formatTime(event.timestamp)}</TimeCell></Td>
-                <Td style={{ fontWeight: 600 }}>{event.customerName}</Td>
-                <Td>{event.productLabel}</Td>
-                <Td>{event.activity}</Td>
-                <Td><StatusBadge $status={event.status}>{event.status}</StatusBadge></Td>
-                <Td style={{ color: '#757D82', fontSize: 12 }}>{event.performedBy}</Td>
-              </Tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <Td colSpan={6} style={{ textAlign: 'center', color: '#757D82', padding: '32px' }}>
-                  No activity matches your filters.
-                </Td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-        <Pagination>
-          <span>Showing {filtered.length} of {activityEvents.length} events</span>
-          <div>
-            <PageButton disabled>← Prev</PageButton>
-            <PageButton $active>1</PageButton>
-            <PageButton disabled>Next →</PageButton>
-          </div>
-        </Pagination>
-      </TableWrapper>
+      <AgTableCard>
+        <AgTable rowData={rowData} columnDefs={colDefs} />
+      </AgTableCard>
     </PageWrapper>
   );
 };

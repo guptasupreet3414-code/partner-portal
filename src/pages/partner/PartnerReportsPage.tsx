@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import type { ColDef } from '@ag-grid-community/core';
 import { customers, entitlementRows } from '../../data/partnerData';
+import { AgTable, AgTableCard } from '../../components/AgTable/AgTable';
+import { HealthBadgeRenderer, ProgressBarRenderer } from '../../components/AgTable/renderers';
 
 const PageWrapper = styled.main``;
 
@@ -167,6 +171,111 @@ const PageButton = styled.button<{ $active?: boolean }>`
   }
 `;
 
+/* ── Report categories (UX-19) ───────────────────────────────────── */
+
+type CategoryId = 'capacity' | 'renewal' | 'adoption' | 'expiring' | 'provisioning' | 'audit';
+
+interface ReportCategory {
+  id: CategoryId;
+  label: string;
+  description: string;
+  icon: string;
+}
+
+const reportCategories: ReportCategory[] = [
+  {
+    id: 'capacity',
+    label: 'Capacity & usage',
+    icon: '📊',
+    description: 'Entitlement utilization and capacity across all customers and services.',
+  },
+  {
+    id: 'renewal',
+    label: 'Renewal readiness',
+    icon: '📅',
+    description: 'Customers with upcoming renewals in the next 90, 60, and 30 days.',
+  },
+  {
+    id: 'adoption',
+    label: 'Service adoption',
+    icon: '🔌',
+    description: 'Which customers have adopted which services — and who hasn\'t.',
+  },
+  {
+    id: 'expiring',
+    label: 'Expiring services',
+    icon: '⏰',
+    description: 'Services and certificates approaching expiration.',
+  },
+  {
+    id: 'provisioning',
+    label: 'Provisioning health',
+    icon: '⚙️',
+    description: 'Active, failed, and in-progress provisioning tasks across your customers.',
+  },
+  {
+    id: 'audit',
+    label: 'Audit activity',
+    icon: '🔍',
+    description: 'Changes, access events, and admin actions across all managed accounts.',
+  },
+];
+
+const CategoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 28px;
+`;
+
+const CategoryCard = styled.button<{ $selected: boolean }>`
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: 14px 16px; text-align: left;
+  border: 1px solid ${({ $selected, theme }) => $selected ? theme.colors.blue300 : theme.colors.neutral200};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  background: ${({ $selected }) => $selected ? '#EEF6FF' : 'white'};
+  cursor: pointer;
+  transition: all 0.15s;
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.blue300};
+    background: #F5F9FF;
+  }
+`;
+
+const CategoryIcon = styled.div`
+  font-size: 18px; margin-bottom: 8px;
+`;
+
+const CategoryLabel = styled.div<{ $selected: boolean }>`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; font-weight: ${({ $selected }) => $selected ? '600' : '500'};
+  color: ${({ $selected, theme }) => $selected ? theme.colors.blue300 : theme.colors.neutral900};
+  margin-bottom: 4px;
+`;
+
+const CategoryDesc = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 11px; color: ${({ theme }) => theme.colors.neutral500};
+  line-height: 1.4;
+`;
+
+const CategoryInfoBanner = styled.div`
+  padding: 12px 16px;
+  background: #EEF6FF;
+  border: 1px solid #BEDAF4;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  margin-bottom: 16px;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; color: #004A80;
+`;
+
+const AuditLinkBtn = styled.button`
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; color: ${({ theme }) => theme.colors.blue300}; font-weight: 500;
+  &:hover { text-decoration: underline; }
+`;
+
 function getAvgUtilization(customerId: string): number {
   const rows = entitlementRows.filter(r => r.customerId === customerId);
   if (!rows.length) return 0;
@@ -175,12 +284,17 @@ function getAvgUtilization(customerId: string): number {
 }
 
 export const PartnerReportsPage: React.FC = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.title = 'Reports — Partner workspace — DigiCert ONE';
   }, []);
 
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('capacity');
   const [customerFilter, setCustomerFilter] = useState('all');
   const [productFilter, setProductFilter] = useState('all');
+
+  const selectedCat = reportCategories.find(c => c.id === selectedCategory)!;
 
   const uniqueProducts = [...new Set(customers.flatMap(c => c.services.filter(s => s.enabled).map(s => s.productLabel)))].sort();
 
@@ -194,11 +308,61 @@ export const PartnerReportsPage: React.FC = () => {
       }))
     );
 
+  const reportRowData = useMemo(() => rows.map(r => ({
+    customerName: r.customer.name,
+    productLabel: r.service.productLabel,
+    health: r.customer.health,
+    utilization: r.utilization,
+    renewalDate: r.customer.renewalDate
+      ? new Date(r.customer.renewalDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      : '—',
+    region: r.customer.region,
+  })), [rows]);
+
+  const reportColDefs = useMemo(() => ([
+    { field: 'customerName', headerName: 'Customer',                flex: 1.5, minWidth: 140 },
+    { field: 'productLabel', headerName: 'Product',                 flex: 1, minWidth: 120 },
+    { field: 'health',       headerName: 'Health',                  cellRenderer: HealthBadgeRenderer, width: 160 },
+    { field: 'utilization',  headerName: 'Entitlement utilization', cellRenderer: ProgressBarRenderer, flex: 1, minWidth: 180 },
+    { field: 'renewalDate',  headerName: 'Renewal date',            width: 150 },
+    { field: 'region',       headerName: 'Region',                  flex: 1, minWidth: 120 },
+  ] as ColDef[]), []);
+
   return (
     <PageWrapper>
       <PageTitle>Reports</PageTitle>
       <ContextLine>Partner workspace · ABC Security</ContextLine>
 
+      {/* UX-19 — Category grid */}
+      <CategoryGrid>
+        {reportCategories.map(cat => (
+          <CategoryCard
+            key={cat.id}
+            $selected={selectedCategory === cat.id}
+            onClick={() => setSelectedCategory(cat.id)}
+          >
+            <CategoryIcon>{cat.icon}</CategoryIcon>
+            <CategoryLabel $selected={selectedCategory === cat.id}>{cat.label}</CategoryLabel>
+            <CategoryDesc>{cat.description}</CategoryDesc>
+          </CategoryCard>
+        ))}
+      </CategoryGrid>
+
+      {selectedCategory === 'audit' ? (
+        <CategoryInfoBanner>
+          Detailed audit activity is available on the{' '}
+          <AuditLinkBtn onClick={() => navigate('/partner/activity')}>
+            Activity page →
+          </AuditLinkBtn>
+        </CategoryInfoBanner>
+      ) : (
+        <CategoryInfoBanner>
+          <strong>{selectedCat.label}</strong> — {selectedCat.description}
+        </CategoryInfoBanner>
+      )}
+
+      {selectedCategory !== 'audit' && (
+      <>
       <Toolbar>
         <FilterSelect
           value={customerFilter}
@@ -225,63 +389,11 @@ export const PartnerReportsPage: React.FC = () => {
         <ExportButton>↓ Export CSV</ExportButton>
       </Toolbar>
 
-      <TableWrapper>
-        <Table>
-          <thead>
-            <tr>
-              <Th>Customer</Th>
-              <Th>Product</Th>
-              <Th>Health</Th>
-              <Th>Entitlement utilization</Th>
-              <Th>Renewal date</Th>
-              <Th>Region</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, idx) => {
-              const util = row.utilization;
-              return (
-                <Tr key={idx}>
-                  <Td style={{ fontWeight: 600 }}>{row.customer.name}</Td>
-                  <Td>{row.service.productLabel}</Td>
-                  <Td>
-                    <HealthBadge $health={row.customer.health}>{row.customer.health}</HealthBadge>
-                  </Td>
-                  <Td>
-                    <UtilBar>
-                      <ProgressBar>
-                        <ProgressFill $pct={util} />
-                      </ProgressBar>
-                      <span style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>{util}%</span>
-                    </UtilBar>
-                  </Td>
-                  <Td>
-                    {row.customer.renewalDate
-                      ? new Date(row.customer.renewalDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                      : '—'}
-                  </Td>
-                  <Td>{row.customer.region}</Td>
-                </Tr>
-              );
-            })}
-            {rows.length === 0 && (
-              <tr>
-                <Td colSpan={6} style={{ textAlign: 'center', color: '#757D82', padding: '32px' }}>
-                  No data matches your filters.
-                </Td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-        <Pagination>
-          <span>Showing {rows.length} records</span>
-          <div>
-            <PageButton disabled>← Prev</PageButton>
-            <PageButton $active>1</PageButton>
-            <PageButton disabled>Next →</PageButton>
-          </div>
-        </Pagination>
-      </TableWrapper>
+      <AgTableCard>
+        <AgTable rowData={reportRowData} columnDefs={reportColDefs} />
+      </AgTableCard>
+      </>
+      )}
     </PageWrapper>
   );
 };

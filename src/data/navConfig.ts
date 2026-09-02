@@ -912,6 +912,7 @@ export const productNavConfig: Record<string, ProductNav> = {
           { label: 'Entitlements', route: '/partner/entitlements' },
           { label: 'Reports', route: '/partner/reports' },
           { label: 'Activity', route: '/partner/activity' },
+          { label: 'Users', route: '/partner/users' },
         ],
       },
     ],

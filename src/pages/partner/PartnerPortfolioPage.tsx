@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -6,10 +6,21 @@ import {
   faUsers, faTriangleExclamation, faChartPie, faCalendarDays,
   faStar, faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
+import type { ColDef } from '@ag-grid-community/core';
 import {
   customers, portfolioAlerts, activityEvents, formatNumber,
   type Customer,
 } from '../../data/partnerData';
+import { AgTable, AgTableCard } from '../../components/AgTable/AgTable';
+import {
+  AvatarNameRenderer,
+  SeverityBadgeRenderer,
+  ReviewLinkRenderer,
+  ProgressBarRenderer,
+  HealthBadgeRenderer,
+  OpenArrowRenderer,
+  CustomerCellRenderer,
+} from '../../components/AgTable/renderers';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -221,7 +232,7 @@ const KpiSub = styled.div`
   color: ${({ theme }) => theme.colors.neutral500};
 `;
 
-/* ── Section card ────────────────────────────────────────────────────── */
+/* ── Section layout ──────────────────────────────────────────────────── */
 
 const SectionCard = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -229,29 +240,26 @@ const SectionCard = styled.div`
   overflow: hidden;
 `;
 
-const SectionHeaderRow = styled.div`
+/* Above-card header row: title+badge+subtitle left, link right */
+const SectionAboveHeader = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 13px 18px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
-  flex-wrap: wrap;
+  margin-bottom: 10px;
   gap: 8px;
 `;
 
-const SectionTitleGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-`;
+const SectionTitleGroup = styled.div``;
 
 const SectionTitle = styled.h2`
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.neutral900};
-  margin: 0;
+  margin: 0 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 const AmberCountBadge = styled.span`
@@ -264,20 +272,22 @@ const AmberCountBadge = styled.span`
   padding: 2px 8px;
 `;
 
-const SectionSubtitle = styled.span`
+const SectionSubtitle = styled.div`
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 12px;
+  font-size: 13px;
   color: ${({ theme }) => theme.colors.neutral500};
 `;
 
 const HeaderLinkBtn = styled.button`
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 12px;
+  font-size: 13px;
   color: ${({ theme }) => theme.colors.blue300};
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
+  margin-top: 2px;
 
   &:hover { text-decoration: underline; }
 `;
@@ -564,6 +574,46 @@ export const PartnerPortfolioPage: React.FC = () => {
 
   const portfolioSorted = [...customers].sort((a, b) => peakUtil(b) - peakUtil(a));
 
+  // Attention Required table
+  const attentionRowData = useMemo(() => portfolioAlerts.map(a => ({
+    customerId: a.customerId,
+    customerName: a.customerName,
+    message: a.message,
+    productLabel: a.productLabel,
+    severity: a.severity,
+  })), []);
+
+  const attentionColDefs = useMemo(() => ([
+    { field: 'customerName', headerName: 'Customer',  cellRenderer: AvatarNameRenderer, flex: 1.5, minWidth: 160 },
+    { field: 'message',      headerName: 'Issue',     flex: 2, minWidth: 180 },
+    { field: 'productLabel', headerName: 'Service',   width: 160 },
+    { field: 'severity',     headerName: 'Severity',  cellRenderer: SeverityBadgeRenderer, width: 110 },
+    { headerName: 'Action',  cellRenderer: ReviewLinkRenderer, width: 110, sortable: false, suppressHeaderMenuButton: true },
+  ] as ColDef[]), []);
+
+  // Customer portfolio table
+  const portfolioRowData = useMemo(() => portfolioSorted.map(c => {
+    const meta = customerMeta[c.id];
+    return {
+      id: c.id,
+      name: c.name,
+      meta: meta ? `${meta.tier} · ${meta.regionLabel ?? c.region}` : c.region,
+      enabledCount: c.services.filter(s => s.enabled).length,
+      peakPct: peakUtil(c),
+      renewalDate: c.renewalDate ? formatDate(c.renewalDate) : '—',
+      health: c.health,
+    };
+  }), [portfolioSorted]);
+
+  const portfolioColDefs = useMemo(() => ([
+    { field: 'name',         headerName: 'Customer',          cellRenderer: CustomerCellRenderer, flex: 1.5, minWidth: 160 },
+    { field: 'enabledCount', headerName: 'Services',          width: 110 },
+    { field: 'peakPct',      headerName: 'Peak Utilization',  cellRenderer: ProgressBarRenderer, flex: 1, minWidth: 160 },
+    { field: 'renewalDate',  headerName: 'Next Renewal',      width: 150 },
+    { field: 'health',       headerName: 'Status',            cellRenderer: HealthBadgeRenderer, width: 160 },
+    { headerName: '',        cellRenderer: OpenArrowRenderer,  width: 80, sortable: false, resizable: false, suppressHeaderMenuButton: true },
+  ] as ColDef[]), []);
+
   return (
     <PageWrapper>
 
@@ -645,114 +695,86 @@ export const PartnerPortfolioPage: React.FC = () => {
 
       {/* ── Attention Required ── */}
       <SectionSpacerBottom>
-        <SectionCard>
-          <SectionHeaderRow>
-            <SectionTitleGroup>
-              <SectionTitle>Attention required</SectionTitle>
+        <SectionAboveHeader>
+          <SectionTitleGroup>
+            <SectionTitle>
+              Attention required
               <AmberCountBadge>{portfolioAlerts.length}</AmberCountBadge>
-              <SectionSubtitle>open issues across {attentionCount} customers</SectionSubtitle>
-            </SectionTitleGroup>
-            <HeaderLinkBtn onClick={() => navigate('/partner/customers')}>
-              View all →
-            </HeaderLinkBtn>
-          </SectionHeaderRow>
-
-          <StyledTable>
-            <Thead>
-              <tr>
-                <Th>Customer</Th>
-                <Th>Issue</Th>
-                <Th>Service</Th>
-                <Th>Severity</Th>
-                <Th>Action</Th>
-              </tr>
-            </Thead>
-            <tbody>
-              {portfolioAlerts.map((alert, idx) => (
-                <ClickableTr
-                  key={idx}
-                  onClick={() => navigate(`/partner/customers/${alert.customerId}`)}
-                >
-                  <Td>
-                    <AvatarCell>
-                      <CustomerAvatar>{initials(alert.customerName)}</CustomerAvatar>
-                      <CustomerNameText>{alert.customerName}</CustomerNameText>
-                    </AvatarCell>
-                  </Td>
-                  <Td style={{ color: '#636A6E' }}>{alert.message}</Td>
-                  <Td style={{ color: '#757D82' }}>{alert.productLabel}</Td>
-                  <Td>
-                    <SeverityBadge $severity={alert.severity}>
-                      {alert.severity === 'error' ? 'High' : alert.severity === 'warning' ? 'Medium' : 'Low'}
-                    </SeverityBadge>
-                  </Td>
-                  <Td onClick={e => e.stopPropagation()}>
-                    <ReviewBtn onClick={() => navigate(`/partner/customers/${alert.customerId}`)}>
-                      Review →
-                    </ReviewBtn>
-                  </Td>
-                </ClickableTr>
-              ))}
-            </tbody>
-          </StyledTable>
+            </SectionTitle>
+            <SectionSubtitle>Open issues across {attentionCount} customers</SectionSubtitle>
+          </SectionTitleGroup>
+          <HeaderLinkBtn onClick={() => navigate('/partner/customers')}>
+            View all →
+          </HeaderLinkBtn>
+        </SectionAboveHeader>
+        <SectionCard>
+          <AgTable
+            rowData={attentionRowData}
+            columnDefs={attentionColDefs}
+            onRowClicked={e => navigate(`/partner/customers/${e.data?.customerId}`)}
+          />
         </SectionCard>
       </SectionSpacerBottom>
 
       {/* ── Bottom 2-column ── */}
       <TwoColGrid>
 
-        {/* Left: Upcoming renewals — card-list style */}
-        <SectionCard>
-          <SectionHeaderRow>
+        {/* Left: Upcoming renewals */}
+        <div>
+          <SectionAboveHeader>
             <SectionTitleGroup>
               <SectionTitle>Upcoming renewals</SectionTitle>
-              <SectionSubtitle>{renewalSorted.length} customers</SectionSubtitle>
+              <SectionSubtitle>{renewalSorted.length} customers with upcoming renewal dates</SectionSubtitle>
             </SectionTitleGroup>
             <HeaderLinkBtn onClick={() => navigate('/partner/customers')}>
               View all →
             </HeaderLinkBtn>
-          </SectionHeaderRow>
-
-          {renewalSorted.map(c => {
-            const meta = customerMeta[c.id];
-            const days = daysUntil(c.renewalDate!);
-            const enabledLabels = c.services
-              .filter(s => s.enabled)
-              .slice(0, 2)
-              .map(s => s.productLabel)
-              .join(', ');
-            const overdue = days <= 0;
-            return (
-              <RenewalItem
-                key={c.id}
-                onClick={() => navigate(`/partner/customers/${c.id}`)}
-              >
-                <RenewalLeft>
-                  <RenewalCustomerName>{c.name}</RenewalCustomerName>
-                  <RenewalMeta>
-                    {enabledLabels}
-                    {c.services.filter(s => s.enabled).length > 2 && ` +${c.services.filter(s => s.enabled).length - 2} more`}
-                    {' · '}
-                    {meta?.tier} · {formatDate(c.renewalDate!)}
-                  </RenewalMeta>
-                </RenewalLeft>
-                <RenewalDaysChip $overdue={overdue}>
-                  {overdue ? 'Overdue' : `${days}d`}
-                </RenewalDaysChip>
-              </RenewalItem>
-            );
-          })}
-        </SectionCard>
+          </SectionAboveHeader>
+          <SectionCard>
+            {renewalSorted.map(c => {
+              const meta = customerMeta[c.id];
+              const days = daysUntil(c.renewalDate!);
+              const enabledLabels = c.services
+                .filter(s => s.enabled)
+                .slice(0, 2)
+                .map(s => s.productLabel)
+                .join(', ');
+              const overdue = days <= 0;
+              return (
+                <RenewalItem
+                  key={c.id}
+                  onClick={() => navigate(`/partner/customers/${c.id}`)}
+                >
+                  <RenewalLeft>
+                    <RenewalCustomerName>{c.name}</RenewalCustomerName>
+                    <RenewalMeta>
+                      {enabledLabels}
+                      {c.services.filter(s => s.enabled).length > 2 && ` +${c.services.filter(s => s.enabled).length - 2} more`}
+                      {' · '}
+                      {meta?.tier} · {formatDate(c.renewalDate!)}
+                    </RenewalMeta>
+                  </RenewalLeft>
+                  <RenewalDaysChip $overdue={overdue}>
+                    {overdue ? 'Overdue' : `${days}d`}
+                  </RenewalDaysChip>
+                </RenewalItem>
+              );
+            })}
+          </SectionCard>
+        </div>
 
         {/* Right: Recent activity */}
-        <SectionCard>
-          <SectionHeaderRow>
-            <SectionTitle>Recent activity</SectionTitle>
+        <div>
+          <SectionAboveHeader>
+            <SectionTitleGroup>
+              <SectionTitle>Recent activity</SectionTitle>
+              <SectionSubtitle>Latest events across your managed customers</SectionSubtitle>
+            </SectionTitleGroup>
             <HeaderLinkBtn onClick={() => navigate('/partner/activity')}>
               View all →
             </HeaderLinkBtn>
-          </SectionHeaderRow>
-          <div>
+          </SectionAboveHeader>
+          <SectionCard>
             {activityEvents.map(event => (
               <ActivityItem key={event.id}>
                 <ActivityTopRow>
@@ -767,84 +789,27 @@ export const PartnerPortfolioPage: React.FC = () => {
                 </ActivityMeta>
               </ActivityItem>
             ))}
-          </div>
-        </SectionCard>
+          </SectionCard>
+        </div>
 
       </TwoColGrid>
 
       {/* ── Customer portfolio table ── */}
-      <SectionCard>
-        <SectionHeaderRow>
+      <SectionAboveHeader>
+        <SectionTitleGroup>
           <SectionTitle>Customer portfolio</SectionTitle>
-          <HeaderLinkBtn onClick={() => navigate('/partner/customers')}>
-            All customers →
-          </HeaderLinkBtn>
-        </SectionHeaderRow>
-        <div style={{
-          padding: '6px 18px 8px',
-          fontSize: '12px',
-          color: '#757D82',
-          fontFamily: 'Roboto, sans-serif',
-        }}>
-          Sorted by peak utilization
-        </div>
-
-        <StyledTable>
-          <Thead>
-            <tr>
-              <Th>Customer</Th>
-              <Th>Services</Th>
-              <Th>Peak Utilization</Th>
-              <Th>Next Renewal</Th>
-              <Th>Status</Th>
-              <Th></Th>
-            </tr>
-          </Thead>
-          <tbody>
-            {portfolioSorted.map(c => {
-              const pct = peakUtil(c);
-              const enabledCount = c.services.filter(s => s.enabled).length;
-              const meta = customerMeta[c.id];
-              return (
-                <ClickableTr
-                  key={c.id}
-                  onClick={() => navigate(`/partner/customers/${c.id}`)}
-                >
-                  <Td>
-                    <PortfolioCustomerName>{c.name}</PortfolioCustomerName>
-                    <PortfolioCustomerMeta>
-                      {meta?.tier} · {meta?.regionLabel ?? c.region}
-                    </PortfolioCustomerMeta>
-                  </Td>
-                  <Td style={{ color: '#636A6E' }}>{enabledCount}</Td>
-                  <Td>
-                    <UtilBar style={{ width: '120px', height: '6px', marginBottom: '4px' }}>
-                      <UtilFill $pct={pct} />
-                    </UtilBar>
-                    <span style={{
-                      fontSize: '12px',
-                      color: pct >= 90 ? '#DC2626' : pct >= 70 ? '#F59E0B' : '#1976D2',
-                    }}>
-                      {pct}%
-                    </span>
-                  </Td>
-                  <Td style={{ fontSize: '13px' }}>
-                    {c.renewalDate ? formatDate(c.renewalDate) : '—'}
-                  </Td>
-                  <Td>
-                    <HealthBadge $health={c.health}>{c.health}</HealthBadge>
-                  </Td>
-                  <Td>
-                    <OpenLinkSpan>
-                      Open
-                      <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: '11px' }} />
-                    </OpenLinkSpan>
-                  </Td>
-                </ClickableTr>
-              );
-            })}
-          </tbody>
-        </StyledTable>
+          <SectionSubtitle>All managed customers, sorted by peak utilization</SectionSubtitle>
+        </SectionTitleGroup>
+        <HeaderLinkBtn onClick={() => navigate('/partner/customers')}>
+          All customers →
+        </HeaderLinkBtn>
+      </SectionAboveHeader>
+      <SectionCard>
+        <AgTable
+          rowData={portfolioRowData}
+          columnDefs={portfolioColDefs}
+          onRowClicked={e => navigate(`/partner/customers/${e.data?.id}`)}
+        />
       </SectionCard>
 
     </PageWrapper>

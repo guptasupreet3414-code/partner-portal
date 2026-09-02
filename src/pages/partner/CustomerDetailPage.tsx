@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronRight, faPlus, faArrowUpRightFromSquare, faEllipsis,
+  faXmark, faArrowRight, faCircleCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   getCustomerById, activityEvents, formatNumber,
@@ -61,13 +62,193 @@ function daysUntil(iso: string): number {
 
 const PageWrapper = styled.main``;
 
-const BackLink = styled.button`
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 0; border: none; background: transparent;
-  color: ${({ theme }) => theme.colors.blue300};
+/* UX-01 — Persistent context breadcrumb */
+const ContextBreadcrumb = styled.div`
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 16px;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px; cursor: pointer; margin-bottom: 16px;
+  font-size: 13px; color: ${({ theme }) => theme.colors.neutral500};
+`;
+
+const BreadcrumbLink = styled.button`
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; color: ${({ theme }) => theme.colors.blue300};
   &:hover { text-decoration: underline; }
+`;
+
+const BreadcrumbSep = styled.span`
+  color: ${({ theme }) => theme.colors.neutral300};
+`;
+
+const BreadcrumbCurrent = styled.span`
+  color: ${({ theme }) => theme.colors.neutral700};
+  font-weight: 500;
+`;
+
+
+/* ── Add Service modal (UX-06) ───────────────────────────────────── */
+
+const ModalBackdrop = styled.div`
+  position: fixed; inset: 0;
+  background: rgba(10, 37, 64, 0.4);
+  z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+`;
+
+const ModalBox = styled.div`
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  width: 100%; max-width: 520px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+`;
+
+const ModalHeader = styled.div`
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
+`;
+
+const ModalTitle = styled.h2`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 16px; font-weight: 600;
+  color: ${({ theme }) => theme.colors.neutral900}; margin: 0;
+`;
+
+const ModalClose = styled.button`
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: ${({ theme }) => theme.colors.neutral500};
+  border-radius: 6px; transition: background 0.15s;
+  &:hover { background: ${({ theme }) => theme.colors.neutral100}; }
+`;
+
+const ModalBody = styled.div`padding: 24px;`;
+
+const ModalStepIndicator = styled.div`
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 20px;
+`;
+
+const ModalStepDot = styled.div<{ $active: boolean; $done: boolean }>`
+  width: 8px; height: 8px; border-radius: 50%;
+  background: ${({ $active, $done, theme }) =>
+    $done ? theme.colors.blue300 : $active ? theme.colors.blue300 : theme.colors.neutral200};
+`;
+
+const ModalStepLabel = styled.span`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px; color: ${({ theme }) => theme.colors.neutral500};
+`;
+
+const ModalSection = styled.div`margin-bottom: 20px;`;
+
+const ModalSectionTitle = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: ${({ theme }) => theme.colors.neutral500}; margin-bottom: 10px;
+`;
+
+const ServiceInfoCard = styled.div`
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background: ${({ theme }) => theme.colors.neutral50};
+`;
+
+const ServiceInfoIcon = styled.div`
+  width: 40px; height: 40px; border-radius: 8px;
+  background: #F0F6FF; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; svg { width: 24px; height: 24px; }
+`;
+
+const ServiceInfoText = styled.div``;
+const ServiceInfoName = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 14px; font-weight: 600; color: ${({ theme }) => theme.colors.neutral900};
+  margin-bottom: 4px;
+`;
+const ServiceInfoDesc = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; color: ${({ theme }) => theme.colors.neutral500};
+`;
+
+const ChecklistItem = styled.div`
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral100};
+  &:last-child { border-bottom: none; }
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; color: ${({ theme }) => theme.colors.neutral700};
+`;
+
+const CheckIcon = styled.span<{ $ok: boolean }>`
+  color: ${({ $ok }) => $ok ? '#27A872' : '#F5B517'};
+  font-size: 14px; flex-shrink: 0;
+`;
+
+const AllocationInput = styled.input`
+  width: 100%; padding: 9px 12px; box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.neutral300};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 14px; color: ${({ theme }) => theme.colors.neutral900};
+  outline: none;
+  &:focus { border-color: ${({ theme }) => theme.colors.blue300}; }
+`;
+
+const AllocationHint = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 12px; color: ${({ theme }) => theme.colors.neutral500};
+  margin-top: 6px;
+`;
+
+const ProvisioningBox = styled.div`
+  text-align: center; padding: 20px 0;
+`;
+
+const ProvisioningTitle = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 15px; font-weight: 600; color: ${({ theme }) => theme.colors.neutral900};
+  margin-bottom: 8px;
+`;
+
+const ProvisioningDesc = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; color: ${({ theme }) => theme.colors.neutral500};
+`;
+
+const ProvisioningSteps = styled.div`margin-top: 20px; text-align: left;`;
+
+const ModalFooter = styled.div`
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
+`;
+
+const ModalPrimaryBtn = styled.button`
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 20px;
+  background: ${({ theme }) => theme.colors.blue300}; color: white; border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: ${({ theme }) => theme.transitions.default};
+  &:hover { background: ${({ theme }) => theme.colors.blue500}; }
+`;
+
+const ModalSecondaryBtn = styled.button`
+  padding: 9px 16px;
+  background: transparent; border: 1px solid ${({ theme }) => theme.colors.neutral300};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px; color: ${({ theme }) => theme.colors.neutral700}; cursor: pointer;
+  transition: ${({ theme }) => theme.transitions.default};
+  &:hover { background: ${({ theme }) => theme.colors.neutral100}; }
 `;
 
 /* ── Page header ─────────────────────────────────────────────────── */
@@ -191,10 +372,6 @@ const SectionTitle = styled.h2`
   font-size: 14px; font-weight: 600; color: ${({ theme }) => theme.colors.neutral900}; margin: 0;
 `;
 
-const SectionSubtitle = styled.div`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 12px; color: ${({ theme }) => theme.colors.neutral500};
-`;
 
 const AddServiceBtn = styled.button`
   padding: 6px 14px;
@@ -478,10 +655,143 @@ const NotFound = styled.div`
 
 /* ── Component ───────────────────────────────────────────────────── */
 
+/* ── Add-service modal sub-component ────────────────────────────── */
+
+interface AddServiceModalProps {
+  productId: string;
+  productLabel: string;
+  customerName: string;
+  onClose: () => void;
+  onEnable: (productId: string) => void;
+}
+
+const AddServiceModal: React.FC<AddServiceModalProps> = ({
+  productId, productLabel, customerName, onClose, onEnable,
+}) => {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const Icon = productIcons[productId];
+
+  const handleEnable = () => {
+    setStep(3);
+    setTimeout(() => {
+      onEnable(productId);
+      onClose();
+    }, 1800);
+  };
+
+  return (
+    <ModalBackdrop onClick={onClose}>
+      <ModalBox onClick={e => e.stopPropagation()}>
+        <ModalHeader>
+          <ModalTitle>Add service to {customerName}</ModalTitle>
+          <ModalClose onClick={onClose} aria-label="Close">
+            <FontAwesomeIcon icon={faXmark} />
+          </ModalClose>
+        </ModalHeader>
+
+        <ModalBody>
+          <ModalStepIndicator>
+            {['Service', 'Allocation', 'Enable'].map((label, idx) => (
+              <React.Fragment key={label}>
+                <ModalStepDot $active={step === idx + 1} $done={step > idx + 1} />
+                <ModalStepLabel style={{ fontWeight: step === idx + 1 ? 600 : 400 }}>
+                  {label}
+                </ModalStepLabel>
+                {idx < 2 && <ModalStepDot $active={false} $done={step > idx + 1} />}
+              </React.Fragment>
+            ))}
+          </ModalStepIndicator>
+
+          {/* Step 1: Service info */}
+          {step === 1 && (
+            <>
+              <ModalSection>
+                <ModalSectionTitle>Selected service</ModalSectionTitle>
+                <ServiceInfoCard>
+                  <ServiceInfoIcon>
+                    {Icon && <Icon aria-hidden="true" focusable="false" />}
+                  </ServiceInfoIcon>
+                  <ServiceInfoText>
+                    <ServiceInfoName>{productLabel}</ServiceInfoName>
+                    <ServiceInfoDesc>{productDescription[productId] ?? ''}</ServiceInfoDesc>
+                  </ServiceInfoText>
+                </ServiceInfoCard>
+              </ModalSection>
+
+              <ModalSection>
+                <ModalSectionTitle>Requirements</ModalSectionTitle>
+                <ChecklistItem>
+                  <CheckIcon $ok={true}><FontAwesomeIcon icon={faCircleCheck} /></CheckIcon>
+                  Eligible under your partner agreement
+                </ChecklistItem>
+                <ChecklistItem>
+                  <CheckIcon $ok={true}><FontAwesomeIcon icon={faCircleCheck} /></CheckIcon>
+                  Partner capacity available
+                </ChecklistItem>
+                <ChecklistItem>
+                  <CheckIcon $ok={true}><FontAwesomeIcon icon={faCircleCheck} /></CheckIcon>
+                  Customer account active
+                </ChecklistItem>
+              </ModalSection>
+            </>
+          )}
+
+          {/* Step 2: Allocation */}
+          {step === 2 && (
+            <ModalSection>
+              <ModalSectionTitle>Initial entitlement allocation</ModalSectionTitle>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: 'Roboto, sans-serif', fontSize: 13, fontWeight: 500, color: '#353535', marginBottom: 7 }}>
+                  {productId === 'certcentral' ? 'SSL/TLS certificates' :
+                   productId === 'trust-lifecycle' ? 'Seats' :
+                   productId === 'private-ca' ? 'Private roots' : 'Units'}
+                </div>
+                <AllocationInput type="number" defaultValue={100} min={1} />
+                <AllocationHint>
+                  Partner unallocated capacity: 2,400 · After allocation: 2,300 remaining
+                </AllocationHint>
+              </div>
+            </ModalSection>
+          )}
+
+          {/* Step 3: Provisioning */}
+          {step === 3 && (
+            <ProvisioningBox>
+              <ProvisioningTitle>Setting up {productLabel}…</ProvisioningTitle>
+              <ProvisioningDesc>Provisioning may take a moment. You can leave this page.</ProvisioningDesc>
+              <ProvisioningSteps>
+                <ChecklistItem><CheckIcon $ok={true}><FontAwesomeIcon icon={faCircleCheck} /></CheckIcon>Account linked</ChecklistItem>
+                <ChecklistItem><CheckIcon $ok={true}><FontAwesomeIcon icon={faCircleCheck} /></CheckIcon>Entitlements allocated</ChecklistItem>
+                <ChecklistItem><CheckIcon $ok={false}><FontAwesomeIcon icon={faCircleCheck} /></CheckIcon>Service provisioning…</ChecklistItem>
+              </ProvisioningSteps>
+            </ProvisioningBox>
+          )}
+        </ModalBody>
+
+        {step < 3 && (
+          <ModalFooter>
+            <ModalSecondaryBtn onClick={step === 1 ? onClose : () => setStep(prev => (prev - 1) as 1 | 2 | 3)}>
+              {step === 1 ? 'Cancel' : 'Back'}
+            </ModalSecondaryBtn>
+            <ModalPrimaryBtn onClick={step === 2 ? handleEnable : () => setStep(prev => (prev + 1) as 1 | 2 | 3)}>
+              {step === 2 ? 'Enable service' : 'Continue'}
+              <FontAwesomeIcon icon={faArrowRight} style={{ fontSize: 11 }} />
+            </ModalPrimaryBtn>
+          </ModalFooter>
+        )}
+      </ModalBox>
+    </ModalBackdrop>
+  );
+};
+
+/* ── Main page ───────────────────────────────────────────────────── */
+
 export const CustomerDetailPage: React.FC = () => {
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
   const [expandedServices, setExpandedServices] = useState<Set<string>>(new Set());
+  const [locallyEnabled, setLocallyEnabled] = useState<string[]>([]);
+  const [addServiceModal, setAddServiceModal] = useState<{ productId: string; productLabel: string } | null>(null);
   const customer = getCustomerById(customerId ?? '');
 
   useEffect(() => {
@@ -490,8 +800,15 @@ export const CustomerDetailPage: React.FC = () => {
 
   if (!customer) return <PageWrapper><NotFound>Customer not found.</NotFound></PageWrapper>;
 
-  const enabledServices  = customer.services.filter(s => s.enabled);
-  const disabledServices = customer.services.filter(s => !s.enabled);
+  const enabledServices = [
+    ...customer.services.filter(s => s.enabled),
+    ...locallyEnabled
+      .map(pid => customer.services.find(s => s.productId === pid))
+      .filter((s): s is NonNullable<typeof s> => s != null),
+  ];
+  const disabledServices = customer.services.filter(
+    s => !s.enabled && !locallyEnabled.includes(s.productId)
+  );
   const customerActivity = activityEvents.filter(e => e.customerId === customer.id);
   const staticMeta = customerStaticMeta[customer.id];
   const allActivity = [
@@ -531,7 +848,14 @@ export const CustomerDetailPage: React.FC = () => {
 
   return (
     <PageWrapper>
-      <BackLink onClick={() => navigate('/partner/customers')}>← Customers</BackLink>
+      {/* UX-01 — Partner context breadcrumb */}
+      <ContextBreadcrumb>
+        <BreadcrumbLink onClick={() => navigate('/partner')}>ABC Security</BreadcrumbLink>
+        <BreadcrumbSep>›</BreadcrumbSep>
+        <BreadcrumbLink onClick={() => navigate('/partner/customers')}>Customers</BreadcrumbLink>
+        <BreadcrumbSep>›</BreadcrumbSep>
+        <BreadcrumbCurrent>{customer.name}</BreadcrumbCurrent>
+      </ContextBreadcrumb>
 
       <PageHeader>
         <TitleBlock>
@@ -684,16 +1008,29 @@ export const CustomerDetailPage: React.FC = () => {
         <SectionCard style={{ marginBottom: 0 }}>
           <SectionHeader>
             <SectionTitle>Available services</SectionTitle>
-            <AddServiceBtn>
+            <AddServiceBtn
+              onClick={() => {
+                const first = disabledServices[0];
+                if (first) setAddServiceModal({ productId: first.productId, productLabel: first.productLabel });
+              }}
+              disabled={disabledServices.length === 0}
+            >
               <FontAwesomeIcon icon={faPlus} style={{ fontSize: 10 }} /> Add service
             </AddServiceBtn>
           </SectionHeader>
           <AvailPadding>
             <AvailChips>
-              {disabledServices.map(service => {
+              {disabledServices.length === 0 ? (
+                <div style={{ fontFamily: 'Roboto, sans-serif', fontSize: 13, color: '#A0AAB0', padding: '4px 0' }}>
+                  All available services are enabled.
+                </div>
+              ) : disabledServices.map(service => {
                 const Icon = productIcons[service.productId];
                 return (
-                  <AvailChip key={service.productId}>
+                  <AvailChip
+                    key={service.productId}
+                    onClick={() => setAddServiceModal({ productId: service.productId, productLabel: service.productLabel })}
+                  >
                     <AvailChipIcon>
                       {Icon && <Icon aria-hidden="true" focusable="false" />}
                     </AvailChipIcon>
@@ -731,6 +1068,17 @@ export const CustomerDetailPage: React.FC = () => {
         </ActivityCard>
 
       </BottomTwoCol>
+
+      {/* UX-06 — Add service modal */}
+      {addServiceModal && (
+        <AddServiceModal
+          productId={addServiceModal.productId}
+          productLabel={addServiceModal.productLabel}
+          customerName={customer.name}
+          onClose={() => setAddServiceModal(null)}
+          onEnable={(pid) => setLocallyEnabled(prev => [...prev, pid])}
+        />
+      )}
     </PageWrapper>
   );
 };
